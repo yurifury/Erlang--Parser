@@ -1,0 +1,3 @@
+[submodule "paxis"]
+	path = paxis
+	url = git://github.com/celtic/paxis.git

@@ -1,0 +1,38 @@
+#!/usr/bin/env ruby
+
+$: << "./paxis"
+
+require 'paxis'
+
+Erlang = Paxis.make do
+    DIRECTIVE /-([a-z]+)\(/
+    RPAREN /\)/
+    ATOM /[a-zA-Z_]+/
+    PERIOD /\./
+    INTCALL /([a-zA-Z_]+)\(/
+    EXTCALL /([a-zA-Z_]+):([a-zA-Z_]+)\(/
+    RARROW /->/
+    STRING /"([^"]*)"/
+    WHITESPACE /[\n \t]+/
+    COMMA /,/
+    LISTOPEN /\[/
+    LISTCLOSE /\]/
+
+    root(rootstmt) {{type: :root, stmts: [rootstmt]}}
+    root(root, root) {{type: :root, stmts: [root_1[:stmts], root_2[:stmts]]}}
+    rootstmt(DIRECTIVE, ATOM, RPAREN, PERIOD) {{type: :directive, directive: DIRECTIVE[0], arg: ATOM[0]}}
+    rootstmt(INTCALL, RPAREN, RARROW, stmtlist, PERIOD) {{type: :define, define: INTCALL[0], stmts: stmtlist}}
+    stmtlist(stmt) {{type: :stmtlist, list: [stmt]}}
+    stmtlist(stmtlist, COMMA, stmt) {{type: :stmtlist, list: stmtlist[:list] + [stmt]}}
+    stmt(call) {call}
+    stmt(STRING) {{type: :string, string: STRING}}
+    stmt(list) {list}
+    call(EXTCALL, stmtlist, RPAREN) {{type: :extcall, extcall: EXTCALL, params: stmtlist[:list]}}
+    list(LISTOPEN, stmtlist, LISTCLOSE) {{type: :list, items: stmtlist[:list]}}
+end
+
+p Erlang.lexparse(File.read(ARGV[0]))
+
+File.open(ARGV[0].gsub(/\.erl$/, "") + ".cgrw", "wb") {|o|}
+
+# vim: set sw=4 ts=8 noet:
