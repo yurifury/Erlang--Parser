@@ -31,7 +31,7 @@ Erlang = Paxis.make do
     list(LISTOPEN, stmtlist, LISTCLOSE) {{type: :list, items: stmtlist[:list]}}
 end
 
-p Erlang.lexparse(File.read(ARGV[0]))
+p Erlang.start(File.read(ARGV[0]))
 
 File.open(ARGV[0].gsub(/\.erl$/, "") + ".cgrw", "wb") {|o|}
 
