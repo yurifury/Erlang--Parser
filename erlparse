@@ -153,6 +153,7 @@ end
 
 Erlang = Paxis.make do
     DIRECTIVE /-([a-z]+)\(/
+    LPAREN /\(/
     RPAREN /\)/
     ATOM /[a-zA-Z_]+/
     PERIOD /\./
@@ -183,11 +184,13 @@ Erlang = Paxis.make do
     stmtlist(stmtlist, COMMA, stmt) {
 	HelperList.new *(stmtlist.stmts + [stmt])
     }
+
     stmt(call) {call}
     stmt(ATOM) {ASTImmAtom.new ATOM[0]}
     stmt(STRING) {ASTImmString.new STRING[0]}
     stmt(INTEGER) {ASTImmInteger.new INTEGER[0].to_i}
     stmt(list) {list}
+    stmt(LPAREN, stmtlist, RPAREN) {stmtlist}
     stmt(stmtlist, DIV, stmtlist) {
 	ASTBinOpDiv.new stmtlist_1.stmts[0], stmtlist_2.stmts[0]
     }
