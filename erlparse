@@ -19,7 +19,12 @@ $: << "./paxis"
 
 require 'paxis'
 
-class ASTRoot
+class ASTNode
+    def to_s; to_erlang end
+    def inspect; to_erlang end
+end
+
+class ASTRoot < ASTNode
     def initialize(*stmts)
 	@stmts = stmts
     end
@@ -31,7 +36,7 @@ class ASTRoot
     attr_accessor :stmts
 end
 
-class ASTDirective
+class ASTDirective < ASTNode
     def initialize(directive, val)
 	@directive, @val = directive, val
     end
@@ -44,7 +49,7 @@ class ASTDirective
     attr_accessor :val
 end
 
-class ASTDefine
+class ASTDefine < ASTNode
     def initialize(name, stmtlist)
 	@name, @stmtlist = name, stmtlist
     end
@@ -57,19 +62,34 @@ class ASTDefine
     attr_accessor :stmtlist
 end
 
-class ASTHelperList
+class HelperList
     def initialize(*stmts)
 	@stmts = stmts
     end
 
     def to_erlang
-	raise "ASTHelperList #{inspect} found its way into reality"
+	raise "HelperList #{inspect} found its way into reality"
     end
+
+    def inspect; "HelperList(#{stmts.map(&:to_erlang).join(", ")})" end
+    alias to_s inspect
 
     attr_accessor :stmts
 end
 
-class ASTImmString
+class ASTImmAtom < ASTNode
+    def initialize val
+	@val = val
+    end
+
+    def to_erlang
+	@val
+    end
+
+    attr_accessor :val
+end
+
+class ASTImmString < ASTNode
     def initialize val
 	@val = val
     end
@@ -81,7 +101,7 @@ class ASTImmString
     attr_accessor :val
 end
 
-class ASTImmInteger
+class ASTImmInteger < ASTNode
     def initialize val
 	@val = val
     end
@@ -93,7 +113,7 @@ class ASTImmInteger
     attr_accessor :val
 end
 
-class ASTExtCall
+class ASTExtCall < ASTNode
     def initialize mod, fun, args
 	@mod, @fun, @args = mod, fun, args
     end
@@ -107,7 +127,7 @@ class ASTExtCall
     attr_accessor :args
 end
 
-class ASTImmList
+class ASTImmList < ASTNode
     def initialize *items
 	@items = items
     end
@@ -117,6 +137,18 @@ class ASTImmList
     end
 
     attr_accessor :items
+end
+
+class ASTBinOpDiv < ASTNode
+    def initialize a, b
+	@a, @b = a, b
+    end
+
+    def to_erlang
+	"(#{a.to_erlang}) / (#{b.to_erlang})"
+    end
+
+    attr_accessor :a, :b
 end
 
 Erlang = Paxis.make do
@@ -130,27 +162,35 @@ Erlang = Paxis.make do
     STRING /"([^"]*)"/
     INTEGER /[0-9]+/
     WHITESPACE /[\n \t]+/
+    COMMENT /%[^\n]*/
     COMMA /,/
     LISTOPEN /\[/
     LISTCLOSE /\]/
+    DIV /\//
+
+    ignore! WHITESPACE, COMMENT
 
     root(rootstmt) {ASTRoot.new rootstmt}
     root(root, root) {ASTRoot.new *(root_1.stmts + root_2.stmts)}
-    rootstmt(DIRECTIVE, ATOM, RPAREN, PERIOD) {
-	ASTDirective.new DIRECTIVE[0], ATOM[0]
+    rootstmt(DIRECTIVE, stmtlist, RPAREN, PERIOD) {
+	ASTDirective.new DIRECTIVE[0], stmtlist.stmts
     }
     rootstmt(INTCALL, RPAREN, RARROW, stmtlist, PERIOD) {
 	ASTDefine.new INTCALL[0], stmtlist.stmts
     }
 
-    stmtlist(stmt) {ASTHelperList.new stmt}
+    stmtlist(stmt) {HelperList.new stmt}
     stmtlist(stmtlist, COMMA, stmt) {
-	ASTHelperList.new *(stmtlist.stmts + [stmt])
+	HelperList.new *(stmtlist.stmts + [stmt])
     }
     stmt(call) {call}
+    stmt(ATOM) {ASTImmAtom.new ATOM[0]}
     stmt(STRING) {ASTImmString.new STRING[0]}
     stmt(INTEGER) {ASTImmInteger.new INTEGER[0].to_i}
     stmt(list) {list}
+    stmt(stmtlist, DIV, stmtlist) {
+	ASTBinOpDiv.new stmtlist_1.stmts[0], stmtlist_2.stmts[0]
+    }
     call(EXTCALL, stmtlist, RPAREN) {
 	ASTExtCall.new EXTCALL[0], EXTCALL[1], stmtlist.stmts
     }
@@ -167,7 +207,7 @@ outf = case ARGV[0]
        else; File.open ARGV[0].gsub(/\.erl$/, "") + ".cgrw"
        end
 
-r = Erlang.start(inf)[0][1]
+r = Erlang.pax!(inf)
 puts r.to_erlang
 
 outf.close
