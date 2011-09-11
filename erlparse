@@ -190,7 +190,7 @@ Erlang = Paxis.make do
     stmt(STRING) {ASTImmString.new STRING[0]}
     stmt(INTEGER) {ASTImmInteger.new INTEGER[0].to_i}
     stmt(list) {list}
-    stmt(LPAREN, stmtlist, RPAREN) {stmtlist}
+    stmt(LPAREN, stmtlist, RPAREN) {stmtlist.stmts[0]}
     stmt(stmtlist, DIV, stmtlist) {
 	ASTBinOpDiv.new stmtlist_1.stmts[0], stmtlist_2.stmts[0]
     }
