@@ -4,6 +4,10 @@
 
 package Erlang::Parser::Dumper;
 
+use strict;
+use warnings;
+use 5.014;
+
 use Data::Dumper;
 
 sub print_tree {
@@ -82,7 +86,9 @@ sub print_node {
 	}
 	print $fh ')';
     } elsif ($kind eq 'string') {
-	print $fh "\"$_[0]\"";
+	print $fh '"';
+	print $fh $_[0] =~ s/\\/\\\\/rg =~ s/"/\\"/rg;
+	print $fh '"';
     } else {
 	print $fh "<<", Dumper($kind), ">>";
     }

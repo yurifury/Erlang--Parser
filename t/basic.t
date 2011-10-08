@@ -1,8 +1,8 @@
-#!/usr/bin/perl -w
+#!/usr/bin/env perl -w
 
 use strict;
 use warnings;
-use 5.010;
+use 5.014;
 
 use Erlang::Parser;
 
@@ -15,6 +15,7 @@ ok( $tree,		'the test data should parse' );
 
 open my $fh, ">", \my $pp;
 Erlang::Parser->print_tree($fh, $tree);
+close $fh;
 
 ok( $pp,		'the test data should pretty-print' );
 
@@ -25,6 +26,7 @@ ok( $pp_tree,		'the pretty-printed test data should parse' );
 
 open my $fh2, ">", \my $pp2;
 Erlang::Parser->print_tree($fh2, $pp_tree);
+close $fh2;
 
 ok( $pp2,		'the parsed pretty-printed test data should pretty-print' );
 
