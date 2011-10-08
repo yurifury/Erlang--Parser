@@ -1,33 +1,42 @@
+%left DIV
+
 %%
-root: # empty
-    | root rootstmt
+root:
+				{ [] }
+    | root rootstmt		{ [@$_[1], $_[2]] }
     ;
 
-rootstmt: DIRECTIVE exprlist RPAREN PERIOD
-    | INTCALL RPAREN RARROW stmtlist PERIOD
+rootstmt:
+      DIRECTIVE exprlist RPAREN PERIOD		{ ['directive', $_[1], $_[2]] }
+    | INTCALL RPAREN RARROW stmtlist PERIOD	{ ['def', $_[1], $_[4]] }
     ;
 
-stmtlist: stmt
-    | stmtlist COMMA stmt
+stmtlist:
+      stmt			{ [$_[1]] }
+    | stmtlist COMMA stmt	{ [@$_[1], $_[3]] }
     ;
 
-stmt: expr;
+stmt:
+      expr;
 
-exprlist: # empty
-    | expr
-    | exprlist COMMA expr
+exprlist:
+				{ [] }
+    | expr			{ [$_[1]] }
+    | exprlist COMMA expr	{ [@$_[1], $_[2]] }
     ;
 
-expr: ATOM
-    | INTEGER
-    | STRING
-    | list
-    | expr DIV expr
-    | EXTCALL exprlist RPAREN
+expr:
+      ATOM			{ ['atom', $_[1]] }
+    | INTEGER			{ ['integer', $_[1]] }
+    | STRING			{ ['string', $_[1]] }
+    | list			{ ['list', $_[1]] }
+    | expr DIV expr		{ ['div', $_[1], $_[3]] }
+    | EXTCALL exprlist RPAREN	{ ['extcall', $_[1], $_[2]] }
     ;
 
-list: LISTOPEN exprlist LISTCLOSE;
-
+list:
+      LISTOPEN exprlist LISTCLOSE	{ $_[2] }
+    ;
 %%
 
 # vim: set sw=4:
