@@ -80,7 +80,6 @@ sub lex {
 	    $skip_token = 0;
 	}
 
-	say $token->name, "\t", $token->text;
 	return ($token->name, $token->text);
     }
 }
