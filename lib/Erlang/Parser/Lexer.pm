@@ -1,8 +1,8 @@
 # Copyright 2011 Anneli Cuss. ( anneli AT cpan DOT org )
-# This script is free software; you can redistribute it and/or modify it under
-# the same terms as Perl itself.
+# This is free software; you can redistribute it and/or modify it under the
+# same terms as Perl itself.
 
-package Parse::Erlang::Lexer;
+package Erlang::Parser::Lexer;
 
 use strict;
 use warnings;

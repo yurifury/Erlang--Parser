@@ -1,6 +1,6 @@
 use ExtUtils::MakeMaker;
 
-my $YAPP_COMMAND = "(yapp -v -m 'Parse::Erlang::Parser' -o lib/Parse/Erlang/Parser.pm lib/Parse/Erlang/Parser.yp)";
+my $YAPP_COMMAND = "(yapp -v -m 'Erlang::Parser::Parser' -o lib/Erlang/Parser/Parser.pm lib/Erlang/Parser/Parser.yp)";
 `$YAPP_COMMAND`;
 
 # Copyright 2011 Anneli Cuss. ( anneli AT cpan DOT org )
@@ -8,9 +8,9 @@ my $YAPP_COMMAND = "(yapp -v -m 'Parse::Erlang::Parser' -o lib/Parse/Erlang/Pars
 # same terms as Perl itself.
 
 WriteMakefile(
-    NAME => 'Parse::Erlang',
-    ABSTRACT_FROM => 'lib/Parse/Erlang.pm',
-    VERSION_FROM => 'lib/Parse/Erlang.pm',
+    NAME => 'Erlang::Parser',
+    ABSTRACT_FROM => 'lib/Erlang/Parser.pm',
+    VERSION_FROM => 'lib/Erlang/Parser.pm',
     AUTHOR => 'Anneli Cuss <anneli@cpan.org>',
     PREREQ_PM => {qw(
 	Parse::Lex	2.20
@@ -20,7 +20,7 @@ WriteMakefile(
 
 sub MY::postamble {
     return <<"MAKE_FRAG";
-lib/Parse/Erlang/Parser.pm: lib/Parse/Erlang/Parser.yp
+lib/Erlang/Parser/Parser.pm: lib/Erlang/Parser/Parser.yp
 	$YAPP_COMMAND
 MAKE_FRAG
 }

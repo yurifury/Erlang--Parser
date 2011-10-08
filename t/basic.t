@@ -4,12 +4,12 @@ use strict;
 use warnings;
 use 5.010;
 
-use Parse::Erlang;
+use Erlang::Parser;
 
 use Test::Simple tests => 2;
 
-my $tree = Parse::Erlang->parse(\*DATA);
-Parse::Erlang->print_tree(*STDERR, $tree);
+my $tree = Erlang::Parser->parse(\*DATA);
+Erlang::Parser->print_tree(*STDERR, $tree);
 
 __END__
 
