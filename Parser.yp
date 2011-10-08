@@ -1,0 +1,33 @@
+%%
+root: # empty
+    | root rootstmt
+    ;
+
+rootstmt: DIRECTIVE exprlist RPAREN PERIOD
+    | INTCALL RPAREN RARROW stmtlist PERIOD
+    ;
+
+stmtlist: stmt
+    | stmtlist COMMA stmt
+    ;
+
+stmt: expr;
+
+exprlist: # empty
+    | expr
+    | exprlist COMMA expr
+    ;
+
+expr: ATOM
+    | INTEGER
+    | STRING
+    | list
+    | expr DIV expr
+    | EXTCALL exprlist RPAREN
+    ;
+
+list: LISTOPEN exprlist LISTCLOSE;
+
+%%
+
+# vim: set sw=4:
