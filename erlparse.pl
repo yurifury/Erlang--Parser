@@ -86,8 +86,8 @@ sub print_node {
 	print "-$directive(";
 	my $first = 1;
 	foreach (@$args) {
-	    print_node(@$_);
 	    if ($first) { $first = 0 } else { print ', ' }
+	    print_node(@$_);
 	}
 	print ").\n";
     } elsif ($kind eq 'atom') {
@@ -97,8 +97,8 @@ sub print_node {
 	print '[';
 	my $first = 1;
 	foreach (@$args) {
-	    print_node(@$_);
 	    if ($first) { $first = 0 } else { print ', ' }
+	    print_node(@$_);
 	}
 	print ']';
     } elsif ($kind eq 'div') {
@@ -110,13 +110,24 @@ sub print_node {
 	print $_[0];
     } elsif ($kind eq 'def') {
 	my ($name, $stmts) = @_;
-	print "$name() ->\n";
+	print "$name() ->\n\t";
 	my $first = 1;
 	foreach (@$stmts) {
 	    if ($first) { $first = 0 } else { print ",\n\t" }
-	    print_node($_);
+	    print_node(@$_);
 	}
 	print ".\n";
+    } elsif ($kind eq 'extcall') {
+	my ($mod, $fun, $args) = (split(':', $_[0]), $_[1]);
+	print "$mod:$fun(";
+	my $first = 1;
+	foreach (@$args) {
+	    if ($first) { $first = 0 } else { print ', ' }
+	    print_node(@$_);
+	}
+	print ')';
+    } elsif ($kind eq 'string') {
+	print "\"$_[0]\"";
     } else {
 	print "<<", Dumper($kind), ">>";
     }
