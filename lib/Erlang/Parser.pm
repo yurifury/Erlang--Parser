@@ -11,10 +11,11 @@ use Erlang::Parser::Lexer;
 use Erlang::Parser::Parser;
 
 sub parse {
-    my $class = shift;
+    my ($class, $data) = @_;
 
-    my $lexer = new Erlang::Parser::Lexer(@_);
-    return (new Erlang::Parser::Parser)->YYParse(yylex => sub { $lexer->lex(@_) });
+    my $parser = new Erlang::Parser::Parser;
+    my $lexerfn = Erlang::Parser::Lexer->lex($data);
+    $parser->YYParse(yylex => $lexerfn);
 }
 
 sub print_tree {

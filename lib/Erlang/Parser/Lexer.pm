@@ -10,98 +10,79 @@ use 5.010;
 
 use Parse::Lex;
 
-sub new {
-    my $class = shift;
-    my $self = {};
-    Parse::Lex->exclusive('dqstr');
-    $self->{LEXER_STRING} = undef;
-    $self->{LEXER_SKIP} = 0;
-    bless $self, $class;
+# NOTE: not re-entrant due to P::L fun.
+our $lexer_string = '';
+our $skip_token = 0;
 
-    $self->{LEXER} = Parse::Lex->new($self->tokens);
-    $self->from($_[0]) if (@_);
+our @tokens = (
+    'EXTCALL',		q!([[:alpha:]_]+):([[:alpha:]_]+)\(!,
+    'INTCALL',		q!([[:alpha:]_]+)\(!,
+    'ATOM',		q![[:alpha:]_]+!,
+    'INTEGER',		q![[:digit:]]+!,
+    'DIRECTIVE',	q!-([a-z]+)\(!,
 
-    return $self;
-}
+    'dqstr:LIT',	q!\\\\"!, sub {
+	$lexer_string .= substr($_[1], 1);
+	$skip_token = 1;
+    },
+    'dqstr:STRING',	q!"!, sub {
+	$_[0]->lexer->end('dqstr');
+	$lexer_string;
+    },
+    'dqstr:CONTENT',	q![^"\\\\]+!, sub {
+	$lexer_string .= $_[1];
+	$skip_token = 1;
+    },
+    'OPENSTRING',	q!"!, sub {
+	$_[0]->lexer->start('dqstr');
+	$lexer_string = '';
+	$skip_token = 1;
+    },
 
-sub from {
-    my ($self, $src) = @_;
-    $self->{LEXER}->from($src);
-}
+    'WHITESPACE',	q!\s!, sub { $skip_token = 1 },
+    'COMMENT',		q!%.*!, sub { $skip_token = 1 },
 
-sub skip_token {
-    my ($self) = @_;
-    $self->{LEXER_SKIP} = 1;
-}
+    'LPAREN',		q!\(!,
+    'RPAREN',		q!\)!,
+    'PERIOD',		q!\.!,
+    'RARROW',		q!->!,
+    'LISTOPEN',		q!\[!,
+    'LISTCLOSE',	q!\]!,
+    'DIVIDE',		q!/!,
+    'ADD',		q!\+!,
+    'SUBTRACT',		q!-!,
+    'MULTIPLY',		q!\*!,
+    'COMMA',		q!,!,
+    'ERROR',		'.*', sub { die qq!can't analyse: "$_[1]"! },
+);
+
+Parse::Lex->exclusive('dqstr');
+our $lex = Parse::Lex->new(@tokens);
+local $.;
 
 sub lex {
-    my ($self) = @_;
-    my $token;
+    my ($class, $src) = @_;
+    $lex->from($src);
 
-    my $lexer = $self->{LEXER};
-    $self->{LEXER_SKIP} = 0;
+    sub {
+	my $token;
 
-    LOOP:while (1) {
-	$token = $lexer->next;
+	$skip_token = 0;
 
-	if ($lexer->eoi or not $token) {
-	    return ('', undef);
-	} elsif (not $self->{LEXER_SKIP}) {
-	    last LOOP;
+	LOOP:while (1) {
+	    $token = $lex->next;
+
+	    if ($lex->eoi or not $token) {
+		return ('', undef);
+	    } elsif (not $skip_token) {
+		last LOOP;
+	    }
+	    $skip_token = 0;
 	}
-	$self->{LEXER_SKIP} = 0;
+
+	say "Line $.\t", $token->name, "\t", $token->text;
+	return ($token->name, $token->text);
     }
-
-    say "Line $.\t", $token->name, "\t", $token->text;
-    return ($token->name, $token->text);
-}
-
-# internal
-
-sub tokens {
-    my ($self) = @_;
-
-    return (
-	'EXTCALL',		q!([[:alpha:]_]+):([[:alpha:]_]+)\(!,
-	'INTCALL',		q!([[:alpha:]_]+)\(!,
-	'ATOM',			q![[:alpha:]_]+!,
-	'INTEGER',		q![[:digit:]]+!,
-	'DIRECTIVE',		q!-([a-z]+)\(!,
-
-	'dqstr:LIT',		q!\\\\"!, sub {
-	    $self->{LEXER_STRING} .= substr($_[1], 1);
-	    $self->skip_token;
-	},
-	'dqstr:STRING',		q!"!, sub {
-	    $self->{LEXER}->end('dqstr');
-	    $self->{LEXER_STRING};
-	},
-	'dqstr:CONTENT',	q![^"\\\\]+!, sub {
-	    $self->{LEXER_STRING} .= $_[1];
-	    $self->skip_token;
-	},
-	'OPENSTRING',		q!"!, sub {
-	    $self->{LEXER}->start('dqstr');
-	    $self->{LEXER_STRING} = '';
-	    $self->skip_token;
-	},
-
-	'WHITESPACE',		q!\s!, sub { $self->skip_token },
-	'COMMENT',		q!%.*!, sub { $self->skip_token },
-
-	'LPAREN',		q!\(!,
-	'RPAREN',		q!\)!,
-	'PERIOD',		q!\.!,
-	'RARROW',		q!->!,
-	'LISTOPEN',		q!\[!,
-	'LISTCLOSE',		q!\]!,
-	'DIVIDE',		q!/!,
-	'ADD',			q!\+!,
-	'SUBTRACT',		q!-!,
-	'MULTIPLY',		q!\*!,
-	'COMMA',		q!,!,
-	'ERROR',		'.*', sub { die qq!can't analyse: "$_[1]"! },
-    );
 }
 
 1;

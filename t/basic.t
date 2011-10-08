@@ -18,12 +18,13 @@ Erlang::Parser->print_tree($fh, $tree);
 
 ok( $pp,		'the test data should pretty-print' );
 
+say STDERR $pp;
 my $pp_tree = Erlang::Parser->parse($pp);
 
 ok( $pp_tree,		'the pretty-printed test data should parse' );
 
-open my $fh, ">", \my $pp2;
-Erlang::Parser->print_tree($fh, $pp_tree);
+open my $fh2, ">", \my $pp2;
+Erlang::Parser->print_tree($fh2, $pp_tree);
 
 ok( $pp2,		'the parsed pretty-printed test data should pretty-print' );
 
