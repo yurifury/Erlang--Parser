@@ -26,7 +26,7 @@ __END__
 
 =head1 NAME
 
-Erlang::Parser - parse Erlang source code
+Erlang::Parser - Erlang source code parser
 
 =cut
 

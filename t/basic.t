@@ -6,10 +6,26 @@ use 5.010;
 
 use Erlang::Parser;
 
-use Test::Simple tests => 2;
+use Test::Simple tests => 4;
 
-my $tree = Erlang::Parser->parse(\*DATA);
-Erlang::Parser->print_tree(*STDERR, $tree);
+my $data = do { local $/; <DATA> };
+my $tree = Erlang::Parser->parse($data);
+
+ok( $tree,		'the test data should parse' );
+
+open my $fh, ">", \my $pp;
+Erlang::Parser->print_tree($fh, $tree);
+
+ok( $pp,		'the test data should pretty-print' );
+
+my $pp_tree = Erlang::Parser->parse($pp);
+
+ok( $pp_tree,		'the pretty-printed test data should parse' );
+
+open my $fh, ">", \my $pp2;
+Erlang::Parser->print_tree($fh, $pp_tree);
+
+ok( $pp2,		'the parsed pretty-printed test data should pretty-print' );
 
 __END__
 
