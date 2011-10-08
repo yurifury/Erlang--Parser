@@ -46,7 +46,10 @@ my @token = (
     'RARROW',		q!->!,
     'LISTOPEN',		q!\[!,
     'LISTCLOSE',	q!\]!,
-    'DIV',		q!/!,
+    'DIVIDE',		q!/!,
+    'ADD',		q!\+!,
+    'SUBTRACT',		q!-!,
+    'MULTIPLY',		q!\*!,
     'COMMA',		q!,!,
     'ERROR',		'.*', sub { die qq!can't analyse: "$_[1]"! },
     'SKIP',		q!!,
@@ -101,11 +104,30 @@ sub print_node {
 	    print_node(@$_);
 	}
 	print ']';
-    } elsif ($kind eq 'div') {
-	my ($a, $b) = @_;
-	print_node(@$a);
+    } elsif ($kind eq 'divide') {
+	print '(';
+	print_node(@{$_[0]});
 	print '/';
-	print_node(@$b);
+	print_node(@{$_[1]});
+	print ')';
+    } elsif ($kind eq 'multiply') {
+	print '(';
+	print_node(@{$_[0]});
+	print '*';
+	print_node(@{$_[1]});
+	print ')';
+    } elsif ($kind eq 'add') {
+	print '(';
+	print_node(@{$_[0]});
+	print '+';
+	print_node(@{$_[1]});
+	print ')';
+    } elsif ($kind eq 'subtract') {
+	print '(';
+	print_node(@{$_[0]});
+	print '-';
+	print_node(@{$_[1]});
+	print ')';
     } elsif ($kind eq 'integer') {
 	print $_[0];
     } elsif ($kind eq 'def') {
@@ -143,5 +165,7 @@ __END__
 
 test() ->
     io:format("This is a ~p~n.", ["te\"st"]),
-    5,2/3.
+    5,
+    2/3+7*10-1,
+    2/(3+7*(10-1)).
 
