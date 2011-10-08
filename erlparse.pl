@@ -1,3 +1,8 @@
+#!/usr/bin/env perl
+# Copyright 2011 Anneli Cuss. ( anneli AT cpan DOT org )
+# This script is free software; you can redistribute it and/or modify it under
+# the same terms as Perl itself.
+
 use strict;
 use warnings;
 use 5.010;
