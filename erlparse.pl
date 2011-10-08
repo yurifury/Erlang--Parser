@@ -10,7 +10,7 @@ our $lexer;
 our $lexer_string;
 our $lexer_skip;
 
-sub skip_token { $lexer_skip = 1; }
+sub skip_token { $lexer_skip = 1 }
 
 my @token = (
     'EXTCALL',		q!([[:alpha:]_]+):([[:alpha:]_]+)\(!,
@@ -56,7 +56,7 @@ Parse::Lex->exclusive('dqstr');
 $lexer = Parse::Lex->new(@token);
 $lexer->from(\*DATA);
 
-sub Lex {
+sub lex {
     my $token;
     $lexer_skip = 0;
     LOOP:while (1) {
@@ -74,8 +74,57 @@ sub Lex {
     return ($token->name, $token->text);
 }
 
+sub print_tree {
+    print_node(@$_) foreach (@{$_[0]});
+}
+
+sub print_node {
+    my $kind = shift;
+
+    if ($kind eq 'directive') {
+	my ($directive, $args) = @_;
+	print "-$directive(";
+	my $first = 1;
+	foreach (@$args) {
+	    print_node(@$_);
+	    if ($first) { $first = 0 } else { print ', ' }
+	}
+	print ").\n";
+    } elsif ($kind eq 'atom') {
+	print "$_[0]";
+    } elsif ($kind eq 'list') {
+	my ($args) = @_;
+	print '[';
+	my $first = 1;
+	foreach (@$args) {
+	    print_node(@$_);
+	    if ($first) { $first = 0 } else { print ', ' }
+	}
+	print ']';
+    } elsif ($kind eq 'div') {
+	my ($a, $b) = @_;
+	print_node(@$a);
+	print '/';
+	print_node(@$b);
+    } elsif ($kind eq 'integer') {
+	print $_[0];
+    } elsif ($kind eq 'def') {
+	my ($name, $stmts) = @_;
+	print "$name() ->\n";
+	my $first = 1;
+	foreach (@$stmts) {
+	    if ($first) { $first = 0 } else { print ",\n\t" }
+	    print_node($_);
+	}
+	print ".\n";
+    } else {
+	print "<<", Dumper($kind), ">>";
+    }
+}
+
 my $parser = new Parser;
-my $result = $parser->YYParse(yylex => \&Lex);
+my $result = $parser->YYParse(yylex => \&lex);
+print_tree $result;
 
 __END__
 -module(test).
