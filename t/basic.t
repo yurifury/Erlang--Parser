@@ -1,20 +1,18 @@
 #!/usr/bin/perl -w
-# Copyright 2011 Anneli Cuss. ( anneli AT cpan DOT org )
-# This script is free software; you can redistribute it and/or modify it under
-# the same terms as Perl itself.
 
 use strict;
 use warnings;
 use 5.010;
 
-BEGIN { push @INC, './lib' }
-
 use Parse::Erlang;
 
+use Test::Simple tests => 2;
+
 my $tree = Parse::Erlang->parse(\*DATA);
-Parse::Erlang->print_tree($tree);
+Parse::Erlang->print_tree(*STDERR, $tree);
 
 __END__
+
 -module(test).
 -export([test/0]).
 
