@@ -2,7 +2,7 @@
 # This script is free software; you can redistribute it and/or modify it under
 # the same terms as Perl itself.
 
-package Parse::Erlang 1.0;
+package Parse::Erlang 0.1;
 
 __END__
 
