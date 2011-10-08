@@ -14,6 +14,11 @@ use Parse::Lex;
 our $lexer_string = '';
 our $skip_token = 0;
 
+our ($EXTCALL, $INTCALL, $ATOM, $INTEGER, $DIRECTIVE, $LIT, $STRING, $CONTENT);
+our ($OPENSTRING, $WHITESPACE, $COMMENT, $LPAREN, $RPAREN, $PERIOD, $RARROW);
+our ($LISTOPEN, $LISTCLOSE, $DIVIDE, $ADD, $SUBTRACT, $MULTIPLY, $COMMA);
+our ($ERROR);
+
 our @tokens = (
     'EXTCALL',		q!([[:alpha:]_]+):([[:alpha:]_]+)\(!,
     'INTCALL',		q!([[:alpha:]_]+)\(!,
