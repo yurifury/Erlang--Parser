@@ -7,94 +7,12 @@ use strict;
 use warnings;
 use 5.010;
 
-use Data::Dumper;
-use Parse::Lex;
+BEGIN { push @INC, './lib' }
 
-use Parser;
-use Lexer;
+use Parse::Erlang;
 
-sub print_tree {
-    print_node(@$_) foreach (@{$_[0]});
-}
-
-sub print_node {
-    my $kind = shift;
-
-    if ($kind eq 'directive') {
-	my ($directive, $args) = @_;
-	print "-$directive(";
-	my $first = 1;
-	foreach (@$args) {
-	    if ($first) { $first = 0 } else { print ', ' }
-	    print_node(@$_);
-	}
-	print ").\n";
-    } elsif ($kind eq 'atom') {
-	print "$_[0]";
-    } elsif ($kind eq 'list') {
-	my ($args) = @_;
-	print '[';
-	my $first = 1;
-	foreach (@$args) {
-	    if ($first) { $first = 0 } else { print ', ' }
-	    print_node(@$_);
-	}
-	print ']';
-    } elsif ($kind eq 'divide') {
-	print '(';
-	print_node(@{$_[0]});
-	print '/';
-	print_node(@{$_[1]});
-	print ')';
-    } elsif ($kind eq 'multiply') {
-	print '(';
-	print_node(@{$_[0]});
-	print '*';
-	print_node(@{$_[1]});
-	print ')';
-    } elsif ($kind eq 'add') {
-	print '(';
-	print_node(@{$_[0]});
-	print '+';
-	print_node(@{$_[1]});
-	print ')';
-    } elsif ($kind eq 'subtract') {
-	print '(';
-	print_node(@{$_[0]});
-	print '-';
-	print_node(@{$_[1]});
-	print ')';
-    } elsif ($kind eq 'integer') {
-	print $_[0];
-    } elsif ($kind eq 'def') {
-	my ($name, $stmts) = @_;
-	print "$name() ->\n\t";
-	my $first = 1;
-	foreach (@$stmts) {
-	    if ($first) { $first = 0 } else { print ",\n\t" }
-	    print_node(@$_);
-	}
-	print ".\n";
-    } elsif ($kind eq 'extcall') {
-	my ($mod, $fun, $args) = (split(':', $_[0]), $_[1]);
-	print "$mod:$fun(";
-	my $first = 1;
-	foreach (@$args) {
-	    if ($first) { $first = 0 } else { print ', ' }
-	    print_node(@$_);
-	}
-	print ')';
-    } elsif ($kind eq 'string') {
-	print "\"$_[0]\"";
-    } else {
-	print "<<", Dumper($kind), ">>";
-    }
-}
-
-my $lexer = new Lexer(\*DATA);
-my $parser = new Parser;
-my $result = $parser->YYParse(yylex => sub { $lexer->lex(@_) });
-print_tree $result;
+my $tree = Parse::Erlang->parse(\*DATA);
+Parse::Erlang->print_tree($tree);
 
 __END__
 -module(test).
