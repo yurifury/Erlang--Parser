@@ -2,11 +2,13 @@
 # This script is free software; you can redistribute it and/or modify it under
 # the same terms as Perl itself.
 
-package Lexer;
+package Parse::Erlang::Lexer;
 
 use strict;
 use warnings;
 use 5.010;
+
+use Parse::Lex;
 
 sub new {
     my $class = shift;

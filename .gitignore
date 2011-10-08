@@ -1,3 +1,5 @@
-*.cgrw
-Parser.output
-Parser.pm
+blib
+Makefile*
+MYMETA*
+lib/Parse/Erlang/Parser.output
+lib/Parse/Erlang/Parser.pm
