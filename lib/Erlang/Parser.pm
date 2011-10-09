@@ -17,7 +17,15 @@ sub parse {
 
     my $parser = new Erlang::Parser::Parser;
     my $lexerfn = Erlang::Parser::Lexer->lex(@_);
-    @{$parser->YYParse(yylex => $lexerfn)};
+    @{$parser->YYParse(yylex => $lexerfn, yyerror => \&error)};
+}
+
+sub error {
+    say STDERR "Parse error!";
+    print STDERR "Failed token was ", $_[0]->YYCurtok;
+    print STDERR ", value ", $_[0]->YYCurval;
+    print STDERR ", expected ", join(',', $_[0]->YYExpect);
+    print STDERR ".\n";
 }
 
 sub print_nodes {
