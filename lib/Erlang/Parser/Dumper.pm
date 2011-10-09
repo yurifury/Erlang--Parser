@@ -27,10 +27,9 @@ sub print_node {
     } elsif ($kind eq 'atom') {
 	print $fh "$_[0]";
     } elsif ($kind eq 'list') {
-	my ($args) = @_;
 	print $fh '[';
 	my $first = 1;
-	foreach (@$args) {
+	foreach (@{$_[0]}) {
 	    if ($first) { $first = 0 } else { print $fh ', ' }
 	    $class->print_node($fh, @$_);
 	}
@@ -87,6 +86,14 @@ sub print_node {
 	print $fh $_[0];
     } elsif ($kind eq 'macro') {
 	print $fh "?$_[0]";
+    } elsif ($kind eq 'tuple') {
+	print $fh '{';
+	my $first = 1;
+	foreach (@{$_[0]}) {
+	    if ($first) { $first = 0 } else { print $fh ', ' }
+	    $class->print_node($fh, @$_);
+	}
+	print $fh '}';
     } else {
 	print $fh "<<", Dumper($kind), ">>";
     }
