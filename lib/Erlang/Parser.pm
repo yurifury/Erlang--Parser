@@ -56,7 +56,7 @@ request with your fix!
 
 A mailing list is available at
 L<http://groups.google.com/group/erlang--parser-devel>, or you can mail direct
-to L<mailto:erlang--parser-devel@googlegroups.com>.
+to <erlang--parser-devel@googlegroups.com>.
 
 The author can also be found on L<Twitter|http://twitter.com/unnali>.
 
