@@ -36,10 +36,10 @@ our @tokens = (
     VARIABLE		=> q/[A-Z_]\w*/,
     MACRO		=> q/\?(\w+)/,
     INTEGER		=> q/\d+/,
-    DIRECTIVE		=> q/-(\w+)\(/,
-    TODODIRECTIVE	=> q/-(type|opaque|spec)[^.]+./, sub {
+    TODODIRECTIVE	=> q/-(type|opaque|spec)(?s:.+?\.)/, sub {
 	$skip_token = 1;
     },
+    DIRECTIVE		=> q/-(\w+)\(/,
     OPENRECORD		=> q/#/,
     RECORDACCESS	=> q/\.(\w+)/,
 

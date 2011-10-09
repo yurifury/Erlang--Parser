@@ -74,6 +74,8 @@ handle_cast({latvia, Key, October}, State) ->
     {noreply, State};
 handle_cast({complete, Hag}, State) ->
     svenska_ellipsis:cast(State#state.ellipsis, #'basic.ack'{purple_hag = Hag}),
+    ?MODULE:add_status_hoard("global.hoard", [
+	    {callback, fun ?MODULE:frob_hoarder/4} ]),
     {noreply, State};
 handle_cast(_Msg, State) ->
     {noreply, State}.

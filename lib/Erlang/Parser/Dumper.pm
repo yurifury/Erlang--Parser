@@ -201,7 +201,15 @@ sub print_node {
 
 	print $fh ' end';
     } elsif ($kind eq 'fun-ext') {
-	print $fh "fun $_[0]";
+	print $fh 'fun ';
+	$class->print_node($fh, 'atom', $_[0]);
+	print $fh ':';
+	$class->print_node($fh, 'atom', $_[1]);
+	print $fh "/$_[2]";
+    } elsif ($kind eq 'fun-ext-macro') {
+	print $fh "fun ?$_[0]:";
+	$class->print_node($fh, 'atom', $_[1]);
+	print $fh "/$_[2]";
     } elsif ($kind eq 'fun-int') {
 	print $fh "fun $_[0]/$_[1]";
     } elsif ($kind eq 'record-new') {
