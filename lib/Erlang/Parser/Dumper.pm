@@ -181,6 +181,10 @@ sub print_node {
 	}
 
 	print $fh ' end';
+    } elsif ($kind eq 'fun-ext') {
+	print $fh "fun $_[0]";
+    } elsif ($kind eq 'fun-int') {
+	print $fh "fun $_[0]/$_[1]";
     } else {
 	print $fh "<<", Dumper($kind), ">>";
     }
