@@ -44,6 +44,7 @@ expr:
     | case
     | fun
     | newrecord
+    | binary
     | expr DIVIDE expr		{ ['divide', $_[1], $_[3]] }
     | expr MULTIPLY expr	{ ['multiply', $_[1], $_[3]] }
     | expr ADD expr		{ ['add', $_[1], $_[3]] }
@@ -82,7 +83,11 @@ fun:
     ;
 
 newrecord:
-      OPENRECORD ATOM TUPLEOPEN exprlist TUPLECLOSE	{ ['record-new', $_[2], $_[4]->[1]] }
+      OPENRECORD ATOM TUPLEOPEN exprlist TUPLECLOSE		{ ['record-new', $_[2], $_[4]->[1]] }
+    ;
+
+binary:
+      OPENBINARY stmtlist CLOSEBINARY				{ ['binary', $_[2]->[1]] }
     ;
 %%
 

@@ -213,8 +213,18 @@ sub print_node {
 	}
 
 	print $fh '}';
+    } elsif ($kind eq 'binary') {
+	print $fh '<<';
+
+	my $first = 1;
+	foreach (@{$_[0]}) {
+	    if ($first) { $first = 0 } else { print $fh ', ' }
+	    $class->print_node($fh, @$_);
+	}
+
+	print $fh '>>';
     } else {
-	print $fh "<<", Dumper($kind), ">>";
+	print $fh "??<", Dumper($kind), ">??";
     }
 }
 
