@@ -73,6 +73,11 @@ or filehandle.  Returns a list of top-level nodes.
 	'myfun(X, Y) -> X + Y.',
     );
 
+=item C<error>
+
+Called when an error occurs. Reports based on the parser given as the first
+argument.
+
 =item C<print_nodes>
 
 Prints the given nodes.

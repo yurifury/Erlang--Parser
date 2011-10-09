@@ -285,6 +285,11 @@ sub print_node {
 
 =over 4
 
+=item C<depth>
+
+Returns the current depth of the pretty-printer, or sets it to the argument if
+one is given.
+
 =item C<print_node>
 
 Prints a node to the given filehandle.
