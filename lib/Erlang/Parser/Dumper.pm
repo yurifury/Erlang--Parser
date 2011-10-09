@@ -205,7 +205,9 @@ sub print_node {
     } elsif ($kind eq 'fun-int') {
 	print $fh "fun $_[0]/$_[1]";
     } elsif ($kind eq 'record-new') {
-	print $fh "#$_[0]\{";
+	print $fh '#';
+	$class->print_node($fh, 'atom', $_[0]);
+	print $fh '{';
 
 	my $first = 1;
 	foreach (@{$_[1]}) {
@@ -215,9 +217,14 @@ sub print_node {
 
 	print $fh '}';
     } elsif ($kind eq 'variable-record-access') {
-	print $fh "$_[0]#$_[1]";
+	$class->print_node($fh, 'variable', $_[0]);
+	print $fh '#';
+	$class->print_node($fh, 'atom', $_[1]);
     } elsif ($kind eq 'variable-record-update') {
-	print $fh "$_[0]#$_[1]\{";
+	$class->print_node($fh, 'variable', $_[0]);
+	print $fh '#';
+	$class->print_node($fh, 'atom', $_[1]);
+	print $fh '{';
 
 	my $first = 1;
 	foreach (@{$_[2]}) {
@@ -255,7 +262,7 @@ sub print_node {
 	print $fh "\n", "\t" x $depth;
 	
 	if (defined $after) {
-	    print 'after ';
+	    print $fh 'after ';
 	    $class->print_node($fh, @{$after->[0]});
 
 	    $depth++;

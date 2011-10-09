@@ -36,8 +36,8 @@ our @tokens = (
     VARIABLE		=> q/[A-Z_]\w*/,
     MACRO		=> q/\?(\w+)/,
     INTEGER		=> q/\d+/,
-    DIRECTIVE		=> q/^-(\w+)\(/,
-    TODODIRECTIVE	=> q/^-(type|opaque|spec)[^.]+./, sub {
+    DIRECTIVE		=> q/-(\w+)\(/,
+    TODODIRECTIVE	=> q/-(type|opaque|spec)[^.]+./, sub {
 	$skip_token = 1;
     },
     OPENRECORD		=> q/#/,
