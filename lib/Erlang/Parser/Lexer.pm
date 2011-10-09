@@ -32,7 +32,7 @@ our @tokens = (
     KW_END		=> q/end(?!\w)/,
     KW_FUN		=> q/fun(?!\w)/,
     INTCALL		=> q/(\w+)\(/,
-    ATOM		=> q/[a-z]\w*/,
+    ATOM		=> q/[a-z][\w.]*/,
     VARIABLE		=> q/[A-Z_]\w*/,
     MACRO		=> q/\?(\w+)/,
     INTEGER		=> q/\d+/,
@@ -40,8 +40,8 @@ our @tokens = (
     TODODIRECTIVE	=> q/^-(type|opaque|spec)[^.]+./, sub {
 	$skip_token = 1;
     },
-    OPENRECORD		=> q/#(\w+){/,
-    RECORDACCESS	=> q/#(\w+)\.(\w+)/,
+    OPENRECORD		=> q/#/,
+    RECORDACCESS	=> q/\.(\w+)/,
 
     'sqatom:ALIT'	=> q/\\\\./, sub {
 	$lexer_string .= substr($_[1], 1);
