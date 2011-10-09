@@ -83,6 +83,10 @@ sub print_node {
 	print $fh '"';
 	print $fh $_[0] =~ s/\\/\\\\/rg =~ s/"/\\"/rg;
 	print $fh '"';
+    } elsif ($kind eq 'variable') {
+	print $fh $_[0];
+    } elsif ($kind eq 'macro') {
+	print $fh "?$_[0]";
     } else {
 	print $fh "<<", Dumper($kind), ">>";
     }

@@ -1,6 +1,6 @@
 blib
 Makefile*
 MYMETA*
-lib/Parse/Erlang/Parser.output
-lib/Parse/Erlang/Parser.pm
+lib/Erlang/Parser/Parser.output
+lib/Erlang/Parser/Parser.pm
 pm_to_blib

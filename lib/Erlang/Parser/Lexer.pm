@@ -22,9 +22,11 @@ our ($ERROR);
 our @tokens = (
     'EXTCALL',		q!([[:alpha:]_]+):([[:alpha:]_]+)\(!,
     'INTCALL',		q!([[:alpha:]_]+)\(!,
-    'ATOM',		q![[:alpha:]_]+!,
+    'ATOM',		q![a-z][[:alnum:]_]*!,
+    'VARIABLE',		q![A-Z_][[:alnum:]_]*!,
+    'MACRO',		q!\?[[:alnum:]_]+!,
     'INTEGER',		q![[:digit:]]+!,
-    'DIRECTIVE',	q!-([a-z]+)\(!,
+    'DIRECTIVE',	q!-([[:alpha:]_]+)\(!,
 
     'dqstr:LIT',	q!\\\\"!, sub {
 	$lexer_string .= substr($_[1], 1);
@@ -85,6 +87,7 @@ sub lex {
 	    $skip_token = 0;
 	}
 
+	say STDERR $token->name, "\t\t", $token->text;
 	return ($token->name, $token->text);
     }
 }

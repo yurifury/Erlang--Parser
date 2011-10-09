@@ -33,6 +33,7 @@ ok( $pp2,		'the parsed pretty-printed test data should pretty-print' );
 __END__
 
 -module(test).
+-include_lib("what.hrl").
 -export([test/0]).
 
 test() ->
@@ -40,5 +41,8 @@ test() ->
     5,
     2/3+7*10-1,
     2/(3+7*(10-1)).
+
+-define(SERVER, ?MODULE).
+-define(EXCHANGE, "who-goes-there").
 
 % vim: set sw=4:
