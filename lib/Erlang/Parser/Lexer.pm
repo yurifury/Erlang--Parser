@@ -15,6 +15,7 @@ our $lexer_string = '';
 our $skip_token = 0;
 
 our ($EXTCALL, $EXTFUN, $INTCALL, $ATOM, $INTEGER, $DIRECTIVE, $LIT, $STRING, $CONTENT);
+our ($ACONTENT, $ALIT, $AATOM, $OPENATOM);
 our ($OPENSTRING, $WHITESPACE, $COMMENT, $LPAREN, $RPAREN, $PERIOD, $RARROW);
 our ($LISTOPEN, $LISTCLOSE, $DIVIDE, $ADD, $SUBTRACT, $MULTIPLY, $COMMA, $SEMICOLON);
 our ($ERROR, $VARIABLE, $MACRO, $TUPLEOPEN, $TUPLECLOSE, $TODODIRECTIVE, $EQUALS);
@@ -40,15 +41,15 @@ our @tokens = (
     },
 
 
-    'sqatom:LIT'	=> q/\\\\./, sub {
+    'sqatom:ALIT'	=> q/\\\\./, sub {
 	$lexer_string .= substr($_[1], 1);
 	$skip_token = 1;
     },
-    'sqatom:ATOM'	=> q/'/, sub {
+    'sqatom:AATOM'	=> q/'/, sub {
 	$_[0]->lexer->end('sqatom');
 	$lexer_string;
     },
-    'sqatom:CONTENT'	=> q/[^'\\\\]+/, sub {
+    'sqatom:ACONTENT'	=> q/[^'\\\\]+/, sub {
 	$lexer_string .= $_[1];
 	$skip_token = 1;
     },

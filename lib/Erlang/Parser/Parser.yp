@@ -33,6 +33,7 @@ exprlist:
 
 expr:
       ATOM			{ ['atom', $_[1]] }
+    | AATOM			{ ['atom', $_[1]] }
     | INTEGER			{ ['integer', $_[1]] }
     | STRING			{ ['string', $_[1]] }
     | VARIABLE			{ ['variable', $_[1]] }
