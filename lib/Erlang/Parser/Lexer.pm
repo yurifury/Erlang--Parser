@@ -14,25 +14,27 @@ use Parse::Lex;
 our $lexer_string = '';
 our $skip_token = 0;
 
-our ($EXTCALL, $INTCALL, $ATOM, $INTEGER, $DIRECTIVE, $LIT, $STRING, $CONTENT);
+our ($EXTCALL, $EXTFUN, $INTCALL, $ATOM, $INTEGER, $DIRECTIVE, $LIT, $STRING, $CONTENT);
 our ($OPENSTRING, $WHITESPACE, $COMMENT, $LPAREN, $RPAREN, $PERIOD, $RARROW);
 our ($LISTOPEN, $LISTCLOSE, $DIVIDE, $ADD, $SUBTRACT, $MULTIPLY, $COMMA, $SEMICOLON);
 our ($ERROR, $VARIABLE, $MACRO, $TUPLEOPEN, $TUPLECLOSE, $TODODIRECTIVE, $EQUALS);
-our ($KW_CASE, $KW_RECEIVE, $KW_AFTER, $KW_END);
+our ($KW_CASE, $KW_RECEIVE, $KW_AFTER, $KW_OF, $KW_END, $KW_FUN);
 
 our @tokens = (
-    EXTCALL		=> q/([[:alpha:]_]+):([[:alpha:]_]+)\(/,
-    INTCALL		=> q/([[:alpha:]_]+)\(/,
-    KW_CASE		=> q/case(?![[:alnum:]_])/,
-    KW_RECEIVE		=> q/receive(?![[:alnum:]_])/,
-    KW_AFTER		=> q/after(?![[:alnum:]_])/,
-    KW_OF		=> q/of(?![[:alnum:]_])/,
-    KW_END		=> q/end(?![[:alnum:]_])/,
-    ATOM		=> q/[a-z][[:alnum:]_]*/,
-    VARIABLE		=> q/[A-Z_][[:alnum:]_]*/,
-    MACRO		=> q/\?[[:alnum:]_]+/,
-    INTEGER		=> q/[[:digit:]]+/,
-    DIRECTIVE		=> q/^-([[:alpha:]_]+)\(/,
+    EXTCALL		=> q/(\w+):(\w+)\(/,
+    EXTFUN		=> q/(\w+):(\w+)\/(\d+)/,
+    KW_CASE		=> q/case(?!\w)/,
+    KW_RECEIVE		=> q/receive(?!\w)/,
+    KW_AFTER		=> q/after(?!\w)/,
+    KW_OF		=> q/of(?!\w)/,
+    KW_END		=> q/end(?!\w)/,
+    KW_FUN		=> q/fun(?!\w)/,
+    INTCALL		=> q/(\w+)\(/,
+    ATOM		=> q/[a-z]\w*/,
+    VARIABLE		=> q/[A-Z_]\w*/,
+    MACRO		=> q/\?\w+/,
+    INTEGER		=> q/\d+/,
+    DIRECTIVE		=> q/^-(\w+)\(/,
     TODODIRECTIVE	=> q/^-(type|opaque|spec)[^.]+./, sub {
 	$skip_token = 1;
     },

@@ -40,6 +40,7 @@ expr:
     | list
     | tuple
     | case
+    | fun
     | expr DIVIDE expr		{ ['divide', $_[1], $_[3]] }
     | expr MULTIPLY expr	{ ['multiply', $_[1], $_[3]] }
     | expr ADD expr		{ ['add', $_[1], $_[3]] }
@@ -69,6 +70,11 @@ altlist:
 
 alt:
       expr RARROW stmtlist	{ ['alt', $_[1], $_[3]->[1]] }
+    ;
+
+fun:
+      KW_FUN LPAREN exprlist RPAREN RARROW stmtlist KW_END	{ ['fun-local', $_[3]->[1], $_[6]->[1]] }
+    | KW_FUN EXTFUN						{ ['fun-ref', $_[2]] }
     ;
 %%
 
