@@ -36,7 +36,7 @@ our @tokens = (
     VARIABLE		=> q/[A-Z_]\w*/,
     MACRO		=> q/\?(\w+)/,
     INTEGER		=> q/\d+/,
-    TODODIRECTIVE	=> q/-(type|opaque|spec)(?s:.+?\.)/, sub {
+    TODODIRECTIVE	=> [q/-(type|opaque|spec)/, q/[^.]+/, q/\./], sub {
 	$skip_token = 1;
     },
     DIRECTIVE		=> q/-(\w+)\(/,
@@ -91,6 +91,8 @@ our @tokens = (
     LISTCLOSE		=> q/\]/,
     TUPLEOPEN		=> q/{/,
     TUPLECLOSE		=> q/}/,
+    LISTSUBTRACT	=> q/--/,
+    LISTADD		=> q/\+\+/,
     EQUALS		=> q/=/,
     DIVIDE		=> q/\//,
     ADD			=> q/\+/,
