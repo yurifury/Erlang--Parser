@@ -14,7 +14,16 @@ root:
 
 rootstmt:
       DIRECTIVE exprlist RPAREN PERIOD			{ ['directive', substr($_[1], 1, -1), $_[2]->[1]] }
-    | INTCALL exprlist RPAREN RARROW stmtlist PERIOD	{ ['def', substr($_[1], 0, -1), $_[2]->[1], $_[5]->[1]] }
+    | deflist PERIOD					{ $_[1] }
+    ;
+
+deflist:
+      def			{ ['deflist', [$_[1]]] }
+    | deflist SEMICOLON def	{ ['deflist', [@{$_[1]->[1]}, $_[3]]] }
+    ;
+
+def:
+      INTCALL exprlist RPAREN RARROW stmtlist		{ ['def', substr($_[1], 0, -1), $_[2]->[1], $_[5]->[1]] }
     ;
 
 stmtlist:

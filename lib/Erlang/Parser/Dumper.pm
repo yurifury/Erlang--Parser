@@ -81,13 +81,20 @@ sub print_node {
 	$class->print_node($fh, @{$_[1]});
     } elsif ($kind eq 'integer') {
 	print $fh $_[0];
+    } elsif ($kind eq 'deflist') {
+	my $first = 1;
+	foreach (@{$_[0]}) {
+	    if ($first) { $first = 0 } else { print $fh ";\n", "\t" x $depth }
+	    $class->print_node($fh, @$_);
+	}
+	print $fh ".\n";
     } elsif ($kind eq 'def') {
 	my ($name, $args, $stmts) = @_;
 	print $fh "$name(";
     
 	my $first = 1;
 	foreach (@$args) {
-	    if ($first) { $first = 0 } else { print $fh ", " }
+	    if ($first) { $first = 0 } else { print $fh ', ' }
 	    $class->print_node($fh, @$_);
 	}
 	
@@ -99,7 +106,6 @@ sub print_node {
 	    if ($first) { $first = 0 } else { print $fh ",\n", "\t" x $depth }
 	    $class->print_node($fh, @$_);
 	}
-	print $fh ".\n";
 
 	$depth--;
     } elsif ($kind eq 'intcall') {
