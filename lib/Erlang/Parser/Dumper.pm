@@ -10,6 +10,17 @@ use 5.014;
 
 use Data::Dumper;
 
+our $depth = 0;
+
+sub depth {
+    my $self = shift;
+    if (defined $_[0]) {
+	$depth = $_[0]
+    } else {
+	$depth
+    }
+}
+
 sub print_node {
     my $class = shift;
     my $fh = shift;
@@ -74,13 +85,17 @@ sub print_node {
 	    $class->print_node($fh, @$_);
 	}
 	
-	print $fh ") ->\n\t";
+	$depth++;
+
+	print $fh ") ->\n", "\t" x $depth;
 	$first = 1;
 	foreach (@$stmts) {
-	    if ($first) { $first = 0 } else { print $fh ",\n\t" }
+	    if ($first) { $first = 0 } else { print $fh ",\n", "\t" x $depth }
 	    $class->print_node($fh, @$_);
 	}
 	print $fh ".\n";
+
+	$depth--;
     } elsif ($kind eq 'intcall') {
 	my ($fun, $args) = @_;
 	print $fh "$fun(";
@@ -115,6 +130,39 @@ sub print_node {
 	    $class->print_node($fh, @$_);
 	}
 	print $fh '}';
+    } elsif ($kind eq 'case') {
+	my ($expr, $alts) = @_;
+
+	print $fh 'case ';
+	$class->print_node($fh, @$expr);
+	print $fh " of\n";
+
+	$depth++;
+
+	print $fh "\t" x $depth;
+
+	my $first = 1;
+	foreach (@$alts) {
+	    if ($first) { $first = 0 } else { print $fh ";\n", "\t" x $depth }
+	    $class->print_node($fh, @$_);
+	}
+
+	$depth--;
+	print $fh "\n", "\t" x $depth, "end";
+    } elsif ($kind eq 'alt') {
+	my ($expr, $stmts) = @_;
+
+	$class->print_node($fh, @$expr);
+	$depth++;
+	print $fh " ->\n", "\t" x $depth;
+
+	my $first = 1;
+	foreach (@$stmts) {
+	    if ($first) { $first = 0 } else { print $fh ",\n", "\t" x $depth }
+	    $class->print_node($fh, @$_);
+	}
+
+	$depth--;
     } else {
 	print $fh "<<", Dumper($kind), ">>";
     }

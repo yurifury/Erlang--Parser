@@ -30,6 +30,7 @@ sub error {
 
 sub print_nodes {
     my ($class, $fh, @nodes) = @_;
+    Erlang::Parser::Dumper->depth(0);
     Erlang::Parser::Dumper->print_node($fh, @$_) foreach (@nodes);
 }
 
