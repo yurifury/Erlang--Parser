@@ -88,6 +88,14 @@ sub print_node {
     }
 }
 
+=over 4
+
+=item C<print_node>
+
+Prints a node to the given filehandle.
+
+=cut
+
 1;
 
 # vim: set sw=4:

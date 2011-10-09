@@ -89,6 +89,15 @@ sub lex {
     }
 }
 
+=over 4
+
+=item C<lex>
+
+Returns an anonymous subroutine that returns a token type/content pair on each
+invocation, and C<('', undef)> when there's no more.
+
+=cut
+
 1;
 
 # vim: set sw=4:
