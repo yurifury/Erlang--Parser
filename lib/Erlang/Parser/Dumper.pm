@@ -10,12 +10,6 @@ use 5.014;
 
 use Data::Dumper;
 
-sub print_tree {
-    my $class = shift;
-    my $fh = shift;
-    $class->print_node($fh, @$_) foreach (@{$_[0]});
-}
-
 sub print_node {
     my $class = shift;
     my $fh = shift;

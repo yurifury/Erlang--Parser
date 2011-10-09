@@ -13,16 +13,16 @@ use Erlang::Parser::Lexer;
 use Erlang::Parser::Parser;
 
 sub parse {
-    my ($class, $data) = @_;
+    my $class = shift;
 
     my $parser = new Erlang::Parser::Parser;
-    my $lexerfn = Erlang::Parser::Lexer->lex($data);
-    $parser->YYParse(yylex => $lexerfn);
+    my $lexerfn = Erlang::Parser::Lexer->lex(@_);
+    @{$parser->YYParse(yylex => $lexerfn)};
 }
 
-sub print_tree {
-    my ($class, $fh, $tree) = @_;
-    Erlang::Parser::Dumper->print_tree($fh, $tree);
+sub print_nodes {
+    my ($class, $fh, @nodes) = @_;
+    Erlang::Parser::Dumper->print_node($fh, @$_) foreach (@nodes);
 }
 
 =head1 NAME
@@ -49,6 +49,29 @@ our $VERSION = '0.1';
 L<Erlang::Parser> is an Erlang source code parser.  You can feed C<parse()> any
 fragment of code which would be acceptable at the top-level of a C<.erl> file,
 including a full file.
+
+=head2 Methods
+
+=over 4
+
+=item C<parse>
+
+Parses an top-level Erlang declarations from a string, list of lines of code,
+or filehandle.  Returns a list of top-level nodes.
+
+    my @nodes = Erlang::Parser->parse(
+	'myfun(X) -> X + X.',
+	'myfun(X, Y) -> X + Y.',
+    );
+
+=item C<print_nodes>
+
+Prints the given nodes.
+
+    my @nodes = Erlang::Parser->parse(\*DATA);
+    Erlang::Parser->print_nodes($fh, @nodes);
+
+=back
 
 =head1 AUTHOR
 

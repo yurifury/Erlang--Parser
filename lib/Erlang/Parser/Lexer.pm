@@ -66,8 +66,8 @@ our $lex = Parse::Lex->new(@tokens);
 local $.;
 
 sub lex {
-    my ($class, $src) = @_;
-    $lex->from($src);
+    my $class = shift;
+    $lex->from(@_);
 
     sub {
 	my $token;

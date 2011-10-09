@@ -9,23 +9,23 @@ use Erlang::Parser;
 use Test::Simple tests => 4;
 
 my $data = do { local $/; <DATA> };
-my $tree = Erlang::Parser->parse($data);
+my @nodes = Erlang::Parser->parse($data);
 
-ok( $tree,		'the test data should parse' );
+ok( @nodes,		'the test data should parse' );
 
 open my $fh, ">", \my $pp;
-Erlang::Parser->print_tree($fh, $tree);
+Erlang::Parser->print_nodes($fh, @nodes);
 close $fh;
 
 ok( $pp,		'the test data should pretty-print' );
 
 say STDERR $pp;
-my $pp_tree = Erlang::Parser->parse($pp);
+my @pp_nodes = Erlang::Parser->parse($pp);
 
-ok( $pp_tree,		'the pretty-printed test data should parse' );
+ok( @pp_nodes,		'the pretty-printed test data should parse' );
 
 open my $fh2, ">", \my $pp2;
-Erlang::Parser->print_tree($fh2, $pp_tree);
+Erlang::Parser->print_nodes($fh2, @pp_nodes);
 close $fh2;
 
 ok( $pp2,		'the parsed pretty-printed test data should pretty-print' );
