@@ -58,6 +58,10 @@ sub print_node {
 	print $fh '-';
 	$class->print_node($fh, @{$_[1]});
 	print $fh ')';
+    } elsif ($kind eq 'equals') {
+	$class->print_node($fh, @{$_[0]});
+	print $fh ' = ';
+	$class->print_node($fh, @{$_[1]});
     } elsif ($kind eq 'integer') {
 	print $fh $_[0];
     } elsif ($kind eq 'def') {
@@ -77,6 +81,15 @@ sub print_node {
 	    $class->print_node($fh, @$_);
 	}
 	print $fh ".\n";
+    } elsif ($kind eq 'intcall') {
+	my ($fun, $args) = @_;
+	print $fh "$fun(";
+	my $first = 1;
+	foreach (@$args) {
+	    if ($first) { $first = 0 } else { print $fh ', ' }
+	    $class->print_node($fh, @$_);
+	}
+	print $fh ')';
     } elsif ($kind eq 'extcall') {
 	my ($mod, $fun, $args) = (split(':', $_[0]), $_[1]);
 	print $fh "$mod:$fun(";

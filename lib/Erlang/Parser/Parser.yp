@@ -44,6 +44,7 @@ expr:
     | expr ADD expr		{ ['add', $_[1], $_[3]] }
     | expr SUBTRACT expr	{ ['subtract', $_[1], $_[3]] }
     | expr EQUALS expr		{ ['equals', $_[1], $_[3]] }
+    | INTCALL exprlist RPAREN	{ ['intcall', substr($_[1], 0, -1), $_[2]->[1]] }
     | EXTCALL exprlist RPAREN	{ ['extcall', substr($_[1], 0, -1), $_[2]->[1]] }
     | LPAREN expr RPAREN	{ $_[2] }
     ;
