@@ -17,7 +17,7 @@ our $skip_token = 0;
 our ($EXTCALL, $INTCALL, $ATOM, $INTEGER, $DIRECTIVE, $LIT, $STRING, $CONTENT);
 our ($OPENSTRING, $WHITESPACE, $COMMENT, $LPAREN, $RPAREN, $PERIOD, $RARROW);
 our ($LISTOPEN, $LISTCLOSE, $DIVIDE, $ADD, $SUBTRACT, $MULTIPLY, $COMMA);
-our ($ERROR, $VARIABLE, $MACRO, $TUPLEOPEN, $TUPLECLOSE);
+our ($ERROR, $VARIABLE, $MACRO, $TUPLEOPEN, $TUPLECLOSE, $TODODIRECTIVE);
 
 our @tokens = (
     EXTCALL		=> q/([[:alpha:]_]+):([[:alpha:]_]+)\(/,
@@ -26,7 +26,10 @@ our @tokens = (
     VARIABLE		=> q/[A-Z_][[:alnum:]_]*/,
     MACRO		=> q/\?[[:alnum:]_]+/,
     INTEGER		=> q/[[:digit:]]+/,
-    DIRECTIVE		=> q/-([[:alpha:]_]+)\(/,
+    DIRECTIVE		=> q/^-([[:alpha:]_]+)\(/,
+    UNSUPDIRECTIVE	=> q/^-(type|opaque|spec)[^.]+./, sub {
+	$skip_token = 1;
+    },
 
     'dqstr:LIT'		=> q/\\\\"/, sub {
 	$lexer_string .= substr($_[1], 1);
