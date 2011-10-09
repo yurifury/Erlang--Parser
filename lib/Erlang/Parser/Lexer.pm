@@ -14,17 +14,16 @@ use Parse::Lex;
 our $lexer_string = '';
 our $skip_token = 0;
 
-our ($EXTCALL, $EXTFUN, $INTCALL, $ATOM, $INTEGER, $DIRECTIVE, $LIT, $STRING, $CONTENT);
+our ($EXTFUN, $INTCALL, $ATOM, $INTEGER, $DIRECTIVE, $LIT, $STRING, $CONTENT);
 our ($ACONTENT, $ALIT, $AATOM, $OPENATOM);
 our ($OPENRECORD, $RECORDACCESS);
 our ($OPENSTRING, $WHITESPACE, $COMMENT, $LPAREN, $RPAREN, $PERIOD, $RARROW);
-our ($LISTOPEN, $LISTCLOSE, $DIVIDE, $ADD, $SUBTRACT, $MULTIPLY, $COMMA, $SEMICOLON);
+our ($LISTOPEN, $LISTCLOSE, $DIVIDE, $ADD, $SUBTRACT, $MULTIPLY, $COMMA, $SEMICOLON, $COLON);
 our ($ERROR, $VARIABLE, $MACRO, $TUPLEOPEN, $TUPLECLOSE, $TODODIRECTIVE, $EQUALS);
 our ($KW_CASE, $KW_RECEIVE, $KW_AFTER, $KW_OF, $KW_END, $KW_FUN);
 our ($OPENBINARY, $CLOSEBINARY);
 
 our @tokens = (
-    EXTCALL		=> q/(\w+):(\w+)\(/,
     EXTFUN		=> q/(\w+):(\w+)\/(\d+)/,
     KW_CASE		=> q/case(?!\w)/,
     KW_RECEIVE		=> q/receive(?!\w)/,
@@ -99,6 +98,7 @@ our @tokens = (
     MULTIPLY		=> q/\*/,
     COMMA		=> q/,/,
     SEMICOLON		=> q/;/,
+    COLON		=> q/:/,
     OPENBINARY		=> q/<</,
     CLOSEBINARY		=> q/>>/,
     ERROR		=> q/.*/, sub { die qq{can't analyse: "$_[1]"} },

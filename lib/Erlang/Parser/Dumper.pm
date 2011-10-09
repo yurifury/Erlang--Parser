@@ -117,9 +117,16 @@ sub print_node {
 	    $class->print_node($fh, @$_);
 	}
 	print $fh ')';
-    } elsif ($kind eq 'extcall') {
-	my ($mod, $fun, $args) = (split(':', $_[0]), $_[1]);
-	print $fh "$mod:$fun(";
+    } elsif ($kind eq 'extcall' or $kind eq 'extcall-macro') {
+	my ($mod, $fun, $args) = @_;
+
+	if ($kind eq 'extcall') {
+	    print $fh $mod;
+	} else {
+	    print $fh "?$mod";
+	}
+
+	print $fh ":$fun(";
 	my $first = 1;
 	foreach (@$args) {
 	    if ($first) { $first = 0 } else { print $fh ', ' }
@@ -229,6 +236,41 @@ sub print_node {
 	}
 
 	print $fh '>>';
+    } elsif ($kind eq 'receive') {
+	my ($alts, $after) = @_;
+
+	print $fh "receive\n";
+
+	$depth++;
+
+	print $fh "\t" x $depth;
+
+	my $first = 1;
+	foreach (@$alts) {
+	    if ($first) { $first = 0 } else { print $fh ";\n", "\t" x $depth }
+	    $class->print_node($fh, @$_);
+	}
+
+	$depth--;
+	print $fh "\n", "\t" x $depth;
+	
+	if (defined $after) {
+	    print 'after ';
+	    $class->print_node($fh, @{$after->[0]});
+
+	    $depth++;
+	    print $fh " ->\n", "\t" x $depth;
+
+	    $first = 1;
+	    foreach (@{$after->[1]}) {
+		if ($first) { $first = 0 } else { print $fh ",\n", "\t" x $depth }
+		$class->print_node($fh, @$_);
+	    }
+
+	    $depth--;
+	}
+	
+	print $fh "\n", "\t" x $depth, "end";
     } else {
 	print $fh "??<", Dumper($kind), ">??";
     }
