@@ -74,7 +74,8 @@ alt:
 
 fun:
       KW_FUN LPAREN exprlist RPAREN RARROW stmtlist KW_END	{ ['fun-local', $_[3]->[1], $_[6]->[1]] }
-    | KW_FUN EXTFUN						{ ['fun-ref', $_[2]] }
+    | KW_FUN EXTFUN						{ ['fun-ext', $_[2]] }
+    | KW_FUN ATOM DIVIDE INTEGER				{ ['fun-int', $_[2], $_[4]] }
     ;
 %%
 

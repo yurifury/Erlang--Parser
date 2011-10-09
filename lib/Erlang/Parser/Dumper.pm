@@ -163,6 +163,24 @@ sub print_node {
 	}
 
 	$depth--;
+    } elsif ($kind eq 'fun-local') {
+	my ($exprs, $stmts) = @_;
+	print $fh 'fun(';
+
+	my $first = 1;
+	foreach (@$exprs) {
+	    if ($first) { $first = 0 } else { print $fh ', ' }
+	    $class->print_node($fh, @$_);
+	}
+
+	print $fh ') -> ';
+	$first = 1;
+	foreach (@$stmts) {
+	    if ($first) { $first = 0 } else { print $fh ', ' }
+	    $class->print_node($fh, @$_);
+	}
+
+	print $fh ' end';
     } else {
 	print $fh "<<", Dumper($kind), ">>";
     }
