@@ -2,6 +2,7 @@
 # This is free software; you can redistribute it and/or modify it under the
 # same terms as Perl itself.
 
+%nonassoc EQUALS
 %left ADD SUBTRACT
 %left DIVIDE MULTIPLY
 
@@ -42,6 +43,7 @@ expr:
     | expr MULTIPLY expr	{ ['multiply', $_[1], $_[3]] }
     | expr ADD expr		{ ['add', $_[1], $_[3]] }
     | expr SUBTRACT expr	{ ['subtract', $_[1], $_[3]] }
+    | expr EQUALS expr		{ ['equals', $_[1], $_[3]] }
     | EXTCALL exprlist RPAREN	{ ['extcall', substr($_[1], 0, -1), $_[2]->[1]] }
     | LPAREN expr RPAREN	{ $_[2] }
     ;

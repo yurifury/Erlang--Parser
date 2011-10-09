@@ -17,7 +17,7 @@ our $skip_token = 0;
 our ($EXTCALL, $INTCALL, $ATOM, $INTEGER, $DIRECTIVE, $LIT, $STRING, $CONTENT);
 our ($OPENSTRING, $WHITESPACE, $COMMENT, $LPAREN, $RPAREN, $PERIOD, $RARROW);
 our ($LISTOPEN, $LISTCLOSE, $DIVIDE, $ADD, $SUBTRACT, $MULTIPLY, $COMMA);
-our ($ERROR, $VARIABLE, $MACRO, $TUPLEOPEN, $TUPLECLOSE, $TODODIRECTIVE);
+our ($ERROR, $VARIABLE, $MACRO, $TUPLEOPEN, $TUPLECLOSE, $TODODIRECTIVE, $EQUALS);
 
 our @tokens = (
     EXTCALL		=> q/([[:alpha:]_]+):([[:alpha:]_]+)\(/,
@@ -27,7 +27,7 @@ our @tokens = (
     MACRO		=> q/\?[[:alnum:]_]+/,
     INTEGER		=> q/[[:digit:]]+/,
     DIRECTIVE		=> q/^-([[:alpha:]_]+)\(/,
-    UNSUPDIRECTIVE	=> q/^-(type|opaque|spec)[^.]+./, sub {
+    TODODIRECTIVE	=> q/^-(type|opaque|spec)[^.]+./, sub {
 	$skip_token = 1;
     },
 
@@ -60,6 +60,7 @@ our @tokens = (
     LISTCLOSE		=> q/\]/,
     TUPLEOPEN		=> q/{/,
     TUPLECLOSE		=> q/}/,
+    EQUALS		=> q/=/,
     DIVIDE		=> q/\//,
     ADD			=> q/\+/,
     SUBTRACT		=> q/-/,
