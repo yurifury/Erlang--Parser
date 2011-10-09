@@ -16,12 +16,18 @@ our $skip_token = 0;
 
 our ($EXTCALL, $INTCALL, $ATOM, $INTEGER, $DIRECTIVE, $LIT, $STRING, $CONTENT);
 our ($OPENSTRING, $WHITESPACE, $COMMENT, $LPAREN, $RPAREN, $PERIOD, $RARROW);
-our ($LISTOPEN, $LISTCLOSE, $DIVIDE, $ADD, $SUBTRACT, $MULTIPLY, $COMMA);
+our ($LISTOPEN, $LISTCLOSE, $DIVIDE, $ADD, $SUBTRACT, $MULTIPLY, $COMMA, $SEMICOLON);
 our ($ERROR, $VARIABLE, $MACRO, $TUPLEOPEN, $TUPLECLOSE, $TODODIRECTIVE, $EQUALS);
+our ($KW_CASE, $KW_RECEIVE, $KW_AFTER, $KW_END);
 
 our @tokens = (
     EXTCALL		=> q/([[:alpha:]_]+):([[:alpha:]_]+)\(/,
     INTCALL		=> q/([[:alpha:]_]+)\(/,
+    KW_CASE		=> q/case(?![[:alnum:]_])/,
+    KW_RECEIVE		=> q/receive(?![[:alnum:]_])/,
+    KW_AFTER		=> q/after(?![[:alnum:]_])/,
+    KW_OF		=> q/of(?![[:alnum:]_])/,
+    KW_END		=> q/end(?![[:alnum:]_])/,
     ATOM		=> q/[a-z][[:alnum:]_]*/,
     VARIABLE		=> q/[A-Z_][[:alnum:]_]*/,
     MACRO		=> q/\?[[:alnum:]_]+/,
@@ -66,6 +72,7 @@ our @tokens = (
     SUBTRACT		=> q/-/,
     MULTIPLY		=> q/\*/,
     COMMA		=> q/,/,
+    SEMICOLON		=> q/;/,
     ERROR		=> q/.*/, sub { die qq{can't analyse: "$_[1]"} },
 );
 
