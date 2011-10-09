@@ -36,7 +36,13 @@ sub print_node {
 	}
 	print $fh ").\n";
     } elsif ($kind eq 'atom') {
-	print $fh "$_[0]";
+	if (not $_[0] =~ /^[^a-z]|[^a-zA-Z_0-9]/) {
+	    print $fh "$_[0]";
+	} else {
+	    print $fh "'";
+	    print $fh $_[0] =~ s/\\/\\\\/rg =~ s/'/\\'/rg;
+	    print $fh "'";
+	}
     } elsif ($kind eq 'list') {
 	print $fh '[';
 	my $first = 1;

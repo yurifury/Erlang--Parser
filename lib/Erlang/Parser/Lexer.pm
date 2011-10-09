@@ -39,7 +39,26 @@ our @tokens = (
 	$skip_token = 1;
     },
 
-    'dqstr:LIT'		=> q/\\\\"/, sub {
+
+    'sqatom:LIT'	=> q/\\\\./, sub {
+	$lexer_string .= substr($_[1], 1);
+	$skip_token = 1;
+    },
+    'sqatom:ATOM'	=> q/'/, sub {
+	$_[0]->lexer->end('sqatom');
+	$lexer_string;
+    },
+    'sqatom:CONTENT'	=> q/[^'\\\\]+/, sub {
+	$lexer_string .= $_[1];
+	$skip_token = 1;
+    },
+    OPENATOM		=> q/'/, sub {
+	$_[0]->lexer->start('sqatom');
+	$lexer_string = '';
+	$skip_token = 1;
+    },
+
+    'dqstr:LIT'		=> q/\\\\./, sub {
 	$lexer_string .= substr($_[1], 1);
 	$skip_token = 1;
     },
@@ -78,7 +97,7 @@ our @tokens = (
     ERROR		=> q/.*/, sub { die qq{can't analyse: "$_[1]"} },
 );
 
-Parse::Lex->exclusive('dqstr');
+Parse::Lex->exclusive(qw(dqstr sqatom));
 our $lex = Parse::Lex->new(@tokens);
 local $.;
 
