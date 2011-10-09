@@ -61,9 +61,17 @@ sub print_node {
     } elsif ($kind eq 'integer') {
 	print $fh $_[0];
     } elsif ($kind eq 'def') {
-	my ($name, $stmts) = @_;
-	print $fh "$name() ->\n\t";
+	my ($name, $args, $stmts) = @_;
+	print $fh "$name(";
+    
 	my $first = 1;
+	foreach (@$args) {
+	    if ($first) { $first = 0 } else { print $fh ", " }
+	    $class->print_node($fh, @$_);
+	}
+	
+	print $fh ") ->\n\t";
+	$first = 1;
 	foreach (@$stmts) {
 	    if ($first) { $first = 0 } else { print $fh ",\n\t" }
 	    $class->print_node($fh, @$_);
