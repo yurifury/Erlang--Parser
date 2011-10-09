@@ -474,6 +474,16 @@ sub
 #line 49 "lib/Erlang/Parser/Parser.yp"
 
 
+=over 4
+
+=item C<new>
+
+Creates a new parser object. See L<Parse::Yapp> for more information.
+
+=cut
+
+1;
+
 # vim: set sw=4 filetype=perl:
 
 1;
