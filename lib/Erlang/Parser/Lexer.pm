@@ -32,7 +32,7 @@ our @tokens = (
     KW_END		=> q/end(?!\w)/,
     KW_FUN		=> q/fun(?!\w)/,
     INTCALL		=> q/(\w+)\(/,
-    ATOM		=> q/[a-z][\w.]*/,
+    ATOM		=> q/[a-z][\w.@]*/,
     VARIABLE		=> q/[A-Z_]\w*/,
     MACRO		=> q/\?(\w+)/,
     INTEGER		=> q/\d+/,
@@ -49,6 +49,7 @@ our @tokens = (
     },
     'sqatom:AATOM'	=> q/'/, sub {
 	$_[0]->lexer->end('sqatom');
+	$_[0]->lexer->setToken($ATOM);
 	$lexer_string;
     },
     'sqatom:ACONTENT'	=> q/[^'\\\\]+/, sub {

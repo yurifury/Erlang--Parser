@@ -33,11 +33,9 @@ exprlist:
 
 expr:
       ATOM			{ ['atom', $_[1]] }
-    | AATOM			{ ['atom', $_[1]] }
     | INTEGER			{ ['integer', $_[1]] }
     | STRING			{ ['string', $_[1]] }
     | VARIABLE OPENRECORD ATOM  { ['variable-record-access', $_[1], $_[3]] }
-    | VARIABLE OPENRECORD AATOM { ['variable-record-access', $_[1], $_[3]] }
     | VARIABLE newrecord	{ ['variable-record-update', $_[1], @{$_[2]}[1..2]] }
     | VARIABLE			{ ['variable', $_[1]] }
     | MACRO			{ ['macro', substr($_[1], 1)] }
@@ -81,12 +79,10 @@ fun:
       KW_FUN LPAREN exprlist RPAREN RARROW stmtlist KW_END	{ ['fun-local', $_[3]->[1], $_[6]->[1]] }
     | KW_FUN EXTFUN						{ ['fun-ext', $_[2]] }
     | KW_FUN ATOM DIVIDE INTEGER				{ ['fun-int', $_[2], $_[4]] }
-    | KW_FUN AATOM DIVIDE INTEGER				{ ['fun-int', $_[2], $_[4]] }
     ;
 
 newrecord:
       OPENRECORD ATOM TUPLEOPEN exprlist TUPLECLOSE	{ ['record-new', $_[2], $_[4]->[1]] }
-    | OPENRECORD AATOM TUPLEOPEN exprlist TUPLECLOSE	{ ['record-new', $_[2], $_[4]->[1]] }
     ;
 %%
 
