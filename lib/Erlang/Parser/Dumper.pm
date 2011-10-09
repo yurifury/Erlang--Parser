@@ -191,6 +191,28 @@ sub print_node {
 	print $fh "fun $_[0]";
     } elsif ($kind eq 'fun-int') {
 	print $fh "fun $_[0]/$_[1]";
+    } elsif ($kind eq 'record-new') {
+	print $fh "#$_[0]\{";
+
+	my $first = 1;
+	foreach (@{$_[1]}) {
+	    if ($first) { $first = 0 } else { print $fh ', ' }
+	    $class->print_node($fh, @$_);
+	}
+
+	print $fh '}';
+    } elsif ($kind eq 'variable-record-access') {
+	print $fh "$_[0]#$_[1]";
+    } elsif ($kind eq 'variable-record-update') {
+	print $fh "$_[0]#$_[1]\{";
+
+	my $first = 1;
+	foreach (@{$_[2]}) {
+	    if ($first) { $first = 0 } else { print $fh ', ' }
+	    $class->print_node($fh, @$_);
+	}
+
+	print $fh '}';
     } else {
 	print $fh "<<", Dumper($kind), ">>";
     }

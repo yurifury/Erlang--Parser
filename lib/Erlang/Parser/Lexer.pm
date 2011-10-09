@@ -16,6 +16,7 @@ our $skip_token = 0;
 
 our ($EXTCALL, $EXTFUN, $INTCALL, $ATOM, $INTEGER, $DIRECTIVE, $LIT, $STRING, $CONTENT);
 our ($ACONTENT, $ALIT, $AATOM, $OPENATOM);
+our ($OPENRECORD, $RECORDACCESS);
 our ($OPENSTRING, $WHITESPACE, $COMMENT, $LPAREN, $RPAREN, $PERIOD, $RARROW);
 our ($LISTOPEN, $LISTCLOSE, $DIVIDE, $ADD, $SUBTRACT, $MULTIPLY, $COMMA, $SEMICOLON);
 our ($ERROR, $VARIABLE, $MACRO, $TUPLEOPEN, $TUPLECLOSE, $TODODIRECTIVE, $EQUALS);
@@ -33,13 +34,14 @@ our @tokens = (
     INTCALL		=> q/(\w+)\(/,
     ATOM		=> q/[a-z]\w*/,
     VARIABLE		=> q/[A-Z_]\w*/,
-    MACRO		=> q/\?\w+/,
+    MACRO		=> q/\?(\w+)/,
     INTEGER		=> q/\d+/,
     DIRECTIVE		=> q/^-(\w+)\(/,
     TODODIRECTIVE	=> q/^-(type|opaque|spec)[^.]+./, sub {
 	$skip_token = 1;
     },
-
+    OPENRECORD		=> q/#(\w+){/,
+    RECORDACCESS	=> q/#(\w+)\.(\w+)/,
 
     'sqatom:ALIT'	=> q/\\\\./, sub {
 	$lexer_string .= substr($_[1], 1);

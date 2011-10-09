@@ -36,12 +36,15 @@ expr:
     | AATOM			{ ['atom', $_[1]] }
     | INTEGER			{ ['integer', $_[1]] }
     | STRING			{ ['string', $_[1]] }
+    | VARIABLE RECORDACCESS	{ ['variable-record-access', $_[1], substr($_[2], 1)] }
+    | VARIABLE newrecord	{ ['variable-record-update', $_[1], @$_[2][1..2]] }
     | VARIABLE			{ ['variable', $_[1]] }
     | MACRO			{ ['macro', substr($_[1], 1)] }
     | list
     | tuple
     | case
     | fun
+    | newrecord
     | expr DIVIDE expr		{ ['divide', $_[1], $_[3]] }
     | expr MULTIPLY expr	{ ['multiply', $_[1], $_[3]] }
     | expr ADD expr		{ ['add', $_[1], $_[3]] }
@@ -77,6 +80,10 @@ fun:
       KW_FUN LPAREN exprlist RPAREN RARROW stmtlist KW_END	{ ['fun-local', $_[3]->[1], $_[6]->[1]] }
     | KW_FUN EXTFUN						{ ['fun-ext', $_[2]] }
     | KW_FUN ATOM DIVIDE INTEGER				{ ['fun-int', $_[2], $_[4]] }
+    ;
+
+newrecord:
+      OPENRECORD exprlist TUPLECLOSE		{ ['record-new', substr($_[1], 1, -1), $_[2]->[1]] }
     ;
 %%
 
