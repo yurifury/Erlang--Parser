@@ -21,9 +21,9 @@ our ($OPENSTRING, $WHITESPACE, $COMMENT, $LPAREN, $RPAREN, $PERIOD, $LARROW, $LD
 our ($LISTOPEN, $LISTCLOSE, $DIVIDE, $ADD, $SUBTRACT, $MULTIPLY, $COMMA, $SEMICOLON, $COLON);
 our ($ERROR, $VARIABLE, $MACRO, $TUPLEOPEN, $TUPLECLOSE, $TODODIRECTIVE, $EQUALS);
 our ($KW_CASE, $KW_RECEIVE, $KW_AFTER, $KW_OF, $KW_END, $KW_FUN, $KW_WHEN, $KW_DIV);
-our ($OPENBINARY, $CLOSEBINARY, $LISTADD, $LISTSUBTRACT, $EQUALITY, $NOT_EQUAL);
-our ($KW_BSL, $KW_BSR, $KW_BOR, $KW_BAND, $KW_BXOR, $KW_REM, $LTE, $GTE, $LT, $GT);
-our ($SEND, $LITERAL, $PIPE, $COMPREHENSION);
+our ($OPENBINARY, $CLOSEBINARY, $LISTADD, $LISTSUBTRACT, $EQUALITY, $NOT_EQUAL, $STRICTLY_EQUAL);
+our ($KW_BSL, $KW_BSR, $KW_BOR, $KW_BAND, $KW_BXOR, $KW_REM, $KW_TRY, $KW_CATCH, $LTE, $GTE, $LT, $GT);
+our ($SEND, $LITERAL, $PIPE, $COMPREHENSION, $CATCH_CLASS, $KW_ANDALSO, $KW_ORELSE);
 
 our @tokens = (
     KW_CASE		=> q/case(?!\w)/,
@@ -40,6 +40,11 @@ our @tokens = (
     KW_BAND		=> q/band(?!\w)/,
     KW_BXOR		=> q/bxor(?!\w)/,
     KW_REM		=> q/rem(?!\w)/,
+    KW_TRY		=> q/try(?!\w)/,
+    KW_CATCH		=> q/catch(?!\w)/,
+    KW_ANDALSO		=> q/andalso(?!\w)/,
+    KW_ORELSE		=> q/orelse(?!\w)/,
+    CATCH_CLASS		=> q/(error|exit|throw):/,
     INTCALL		=> q/(\w+)\(/,
     ATOM		=> q/[a-z]([\w@.]*\w)?/,
     VARIABLE		=> q/[A-Z_]\w*/,
@@ -109,6 +114,7 @@ our @tokens = (
     LISTSUBTRACT	=> q/--/,
     LISTADD		=> q/\+\+/,
     EQUALITY		=> q/==/,
+    STRICTLY_EQUAL	=> q/=:=/,
     NOT_EQUAL		=> q/=\/=/,
     EQUALS		=> q/=/,
     DIVIDE		=> q/\//,

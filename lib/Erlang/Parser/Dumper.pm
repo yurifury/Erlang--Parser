@@ -182,9 +182,11 @@ sub print_node {
 
 	$depth--;
 	print $fh "\n", "\t" x $depth, "end";
-    } elsif ($kind eq 'alt') {
+    } elsif ($kind eq 'alt' or $kind eq 'catchalt') {
+	my $catchclass = $kind eq 'catchalt' ? shift : undef;
 	my ($expr, $stmts) = @_;
 
+	print $fh "$catchclass:" if $catchclass;
 	$class->print_node($fh, @$expr);
 	$depth++;
 	print $fh " ->\n", "\t" x $depth;
@@ -361,9 +363,14 @@ sub print_node {
 	$class->print_node($fh, @{$_[0]});
 	print $fh ' == ';
 	$class->print_node($fh, @{$_[1]});
+    } elsif ($kind eq 'strictly-equal') {
+	$class->print_node($fh, @{$_[0]});
+	print $fh ' =:= ';
+	$class->print_node($fh, @{$_[1]});
     } elsif ($kind eq 'bor' or $kind eq 'band' or $kind eq 'bxor' or
 	     $kind eq 'bsl' or $kind eq 'bsr' or
-	     $kind eq 'div' or $kind eq 'rem') {
+	     $kind eq 'div' or $kind eq 'rem' or
+	     $kind eq 'andalso' or $kind eq 'orelse') {
 	print $fh '(';
 	$class->print_node($fh, @{$_[0]});
 	print $fh " $kind ";
@@ -381,6 +388,72 @@ sub print_node {
     } elsif ($kind eq 'literal') {
 	print $fh '$';
 	print $fh chr($_[0]);
+    } elsif ($kind eq 'try') {
+	my ($exprs, $alts, $catches, $afters) = @_;
+
+	print $fh "try\n";
+
+	$depth++;
+	print $fh "\t" x $depth;
+
+	my $first = 1;
+	foreach (@$exprs) {
+	    if ($first) { $first = 0 } else { print $fh ";\n", "\t" x $depth }
+	    $class->print_node($fh, @$_);
+	}
+
+	$depth--;
+	print $fh "\n", "\t" x $depth;
+
+	if ($alts) {
+	    print $fh "of\n";
+
+	    $depth++;
+	    print $fh "\t" x $depth;
+
+	    my $first = 1;
+	    foreach (@$alts) {
+		if ($first) { $first = 0 } else { print $fh ";\n", "\t" x $depth }
+		$class->print_node($fh, @$_);
+	    }
+
+	    $depth--;
+	    print $fh "\n", "\t" x $depth;
+	}
+
+	if ($catches) {
+	    print $fh "catch\n";
+
+	    $depth++;
+	    print $fh "\t" x $depth;
+
+	    my $first = 1;
+	    foreach (@$catches) {
+		if ($first) { $first = 0 } else { print $fh ";\n", "\t" x $depth }
+		$class->print_node($fh, @$_);
+	    }
+
+	    $depth--;
+	    print $fh "\n", "\t" x $depth;
+	}
+
+	if ($afters) {
+	    print $fh "after\n";
+
+	    $depth++;
+	    print $fh "\t" x $depth;
+
+	    my $first = 1;
+	    foreach (@$afters) {
+		if ($first) { $first = 0 } else { print $fh ";\n", "\t" x $depth }
+		$class->print_node($fh, @$_);
+	    }
+
+	    $depth--;
+	    print $fh "\n", "\t" x $depth;
+	}
+    
+	print $fh "end";
     } else {
 	print $fh "??<", Dumper($kind), ">??";
 	exit 5;

@@ -2,7 +2,7 @@
 # This is free software; you can redistribute it and/or modify it under the
 # same terms as Perl itself.
 
-%nonassoc EQUALS EQUALITY NOT_EQUAL LARROW LDARROW LTE GTE LT GT
+%nonassoc EQUALS EQUALITY NOT_EQUAL LARROW LDARROW LTE GTE LT GT STRICTLY_EQUAL KW_ANDALSO KW_ORELSE
 %right SEND
 %left KW_BAND KW_BOR KW_BXOR
 %left KW_BSL KW_BSR
@@ -66,6 +66,7 @@ expr:
     | binary
     | receive
     | comprehension
+    | try
     | expr SEND expr		{ ['send', $_[1], $_[3]] }
     | expr LT expr		{ ['lt', $_[1], $_[3]] }
     | expr LTE expr		{ ['lte', $_[1], $_[3]] }
@@ -80,6 +81,7 @@ expr:
     | expr LISTADD expr		{ ['list-add', $_[1], $_[3]] }
     | expr LISTSUBTRACT expr	{ ['list-subtract', $_[1], $_[3]] }
     | expr EQUALITY expr	{ ['equality', $_[1], $_[3]] }
+    | expr STRICTLY_EQUAL expr	{ ['strictly-equal', $_[1], $_[3]] }
     | expr NOT_EQUAL expr	{ ['not-equal', $_[1], $_[3]] }
     | expr KW_BSL expr		{ ['bsl', $_[1], $_[3]] }
     | expr KW_BSR expr		{ ['bsr', $_[1], $_[3]] }
@@ -87,6 +89,8 @@ expr:
     | expr KW_BAND expr		{ ['band', $_[1], $_[3]] }
     | expr KW_BXOR expr		{ ['bxor', $_[1], $_[3]] }
     | expr KW_REM expr		{ ['rem', $_[1], $_[3]] }
+    | expr KW_ANDALSO expr	{ ['andalso', $_[1], $_[3]] }
+    | expr KW_ORELSE expr	{ ['orelse', $_[1], $_[3]] }
 
     # TODO: unhack this.
     | expr LARROW expr		{ ['larrow', $_[1], $_[3]] }
@@ -195,6 +199,35 @@ receive:
 after:
 								{ undef }
     | KW_AFTER expr RARROW exprlist				{ [$_[2], $_[4]->[1]] }
+    ;
+
+try:
+      KW_TRY exprlist opttryof opttrycatch opttryafter KW_END	{ ['try', $_[2]->[1], $_[3], $_[4], $_[5]] }
+    ;
+
+opttryof:
+								{ undef }
+    | KW_OF altlist						{ $_[2]->[1] }
+    ;
+
+opttrycatch:
+								{ undef }
+    | KW_CATCH catchaltlist					{ $_[2]->[1] }
+    ;
+
+opttryafter:
+								{ undef }
+    | KW_AFTER exprlist 					{ $_[2]->[1] }
+    ;
+
+catchaltlist:
+      catchalt				{ ['catchaltlist', [$_[1]]] }
+    | catchaltlist SEMICOLON catchalt	{ ['catchaltlist', [@{$_[1]->[1]}, $_[3]]] }
+    ;
+
+catchalt:
+      CATCH_CLASS expr RARROW stmtlist	{ ['catchalt', substr($_[1], 0, -1), $_[2], $_[4]->[1]] }
+    | expr RARROW stmtlist		{ ['catchalt', undef, $_[1], $_[3]->[1]] }
     ;
 %%
 
