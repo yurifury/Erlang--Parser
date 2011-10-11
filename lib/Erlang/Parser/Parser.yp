@@ -2,12 +2,19 @@
 # This is free software; you can redistribute it and/or modify it under the
 # same terms as Perl itself.
 
-%nonassoc EQUALS
+%nonassoc EQUALS EQUALITY NOT_EQUAL LARROW LDARROW LTE GTE LT GT
+%right SEND
+%left KW_BAND KW_BOR KW_BXOR
+%left KW_BSL KW_BSR
 %left ADD SUBTRACT
-%left DIVIDE MULTIPLY
+%left DIVIDE KW_DIV MULTIPLY KW_REM
 %right LISTADD LISTSUBTRACT
 
 %%
+
+# TODO: A few of these lists are flawed in that their optional type isn't done correctly
+# (they allow constructs like [, 1, 2]). Fix this.
+
 root:
 				{ [] }
     | root rootstmt		{ [@{$_[1]}, $_[2]] }
@@ -24,7 +31,13 @@ deflist:
     ;
 
 def:
-      INTCALL exprlist RPAREN RARROW stmtlist		{ ['def', substr($_[1], 0, -1), $_[2]->[1], $_[5]->[1]] }
+      INTCALL exprlist RPAREN whenlist RARROW stmtlist	{ ['def', substr($_[1], 0, -1), $_[2]->[1], $_[4]->[1], $_[6]->[1]] }
+    ;
+
+whenlist:
+				{ ['whenlist', []] }
+    | KW_WHEN expr		{ ['whenlist', [$_[2]]] }
+    | whenlist COMMA expr	{ ['whenlist', [@{$_[1]->[1]}, $_[3]]] }
     ;
 
 stmtlist:
@@ -43,12 +56,8 @@ exprlist:
 
 expr:
       ATOM			{ ['atom', $_[1]] }
-    | INTEGER			{ ['integer', $_[1]] }
-    | STRING			{ ['string', $_[1]] }
-    | VARIABLE OPENRECORD ATOM  { ['variable-record-access', $_[1], $_[3]] }
-    | VARIABLE newrecord	{ ['variable-record-update', $_[1], @{$_[2]}[1..2]] }
-    | VARIABLE			{ ['variable', $_[1]] }
-    | MACRO			{ ['macro', substr($_[1], 1)] }
+    | FLOAT			{ ['float', $_[1]] }
+    | immexpr
     | list
     | tuple
     | case
@@ -56,16 +65,47 @@ expr:
     | newrecord
     | binary
     | receive
+    | comprehension
+    | expr SEND expr		{ ['send', $_[1], $_[3]] }
+    | expr LT expr		{ ['lt', $_[1], $_[3]] }
+    | expr LTE expr		{ ['lte', $_[1], $_[3]] }
+    | expr GT expr		{ ['gt', $_[1], $_[3]] }
+    | expr GTE expr		{ ['gte', $_[1], $_[3]] }
     | expr DIVIDE expr		{ ['divide', $_[1], $_[3]] }
+    | expr KW_DIV expr		{ ['div', $_[1], $_[3]] }
     | expr MULTIPLY expr	{ ['multiply', $_[1], $_[3]] }
     | expr ADD expr		{ ['add', $_[1], $_[3]] }
     | expr SUBTRACT expr	{ ['subtract', $_[1], $_[3]] }
     | expr EQUALS expr		{ ['equals', $_[1], $_[3]] }
     | expr LISTADD expr		{ ['list-add', $_[1], $_[3]] }
     | expr LISTSUBTRACT expr	{ ['list-subtract', $_[1], $_[3]] }
+    | expr EQUALITY expr	{ ['equality', $_[1], $_[3]] }
+    | expr NOT_EQUAL expr	{ ['not-equal', $_[1], $_[3]] }
+    | expr KW_BSL expr		{ ['bsl', $_[1], $_[3]] }
+    | expr KW_BSR expr		{ ['bsr', $_[1], $_[3]] }
+    | expr KW_BOR expr		{ ['bor', $_[1], $_[3]] }
+    | expr KW_BAND expr		{ ['band', $_[1], $_[3]] }
+    | expr KW_BXOR expr		{ ['bxor', $_[1], $_[3]] }
+    | expr KW_REM expr		{ ['rem', $_[1], $_[3]] }
+
+    # TODO: unhack this.
+    | expr LARROW expr		{ ['larrow', $_[1], $_[3]] }
+    | expr LDARROW expr		{ ['ldarrow', $_[1], $_[3]] }
+
     | INTCALL exprlist RPAREN	{ ['intcall', substr($_[1], 0, -1), $_[2]->[1]] }
     | extcall
     | LPAREN expr RPAREN	{ $_[2] }
+    ;
+
+immexpr:
+      BASE_INTEGER		{ ['base-integer', $_[1]] }
+    | INTEGER			{ ['integer', $_[1]] }
+    | STRING			{ ['string', $_[1]] }
+    | VARIABLE OPENRECORD ATOM  { ['variable-record-access', $_[1], $_[3]] }
+    | VARIABLE newrecord	{ ['variable-record-update', $_[1], @{$_[2]}[1..2]] }
+    | VARIABLE			{ ['variable', $_[1]] }
+    | MACRO			{ ['macro', substr($_[1], 1)] }
+    | LITERAL			{ ['literal', ord(substr($_[1], 1))] }
     ;
 
 extcall:
@@ -75,7 +115,17 @@ extcall:
     ;
 
 list:
-      LISTOPEN exprlist LISTCLOSE	{ ['list', $_[2]->[1]] }
+      LISTOPEN exprlist listcdr LISTCLOSE	{ ['list', $_[2]->[1], $_[3]] }
+    ;
+
+# This is not a full node.
+listcdr:
+						{ undef }
+    | PIPE expr					{ $_[2] }
+    ;
+
+comprehension:
+      LISTOPEN expr COMPREHENSION exprlist LISTCLOSE	{ ['comprehension', $_[2], $_[4]->[1]] }
     ;
 
 tuple:
@@ -108,7 +158,33 @@ newrecord:
     ;
 
 binary:
-      OPENBINARY stmtlist CLOSEBINARY				{ ['binary', $_[2]->[1]] }
+      OPENBINARY binarylist CLOSEBINARY				{ ['binary', $_[2]->[1]] }
+    ;
+
+binarylist:
+								{ ['binarylist', []] }
+    | binaryexpr						{ ['binarylist', [$_[1]]] }
+    | binarylist COMMA binaryexpr				{ ['binarylist', [@{$_[1]->[1]}, $_[3]]] }
+    ;
+
+binaryexpr:
+      immexpr
+    | binaryqualified
+    ;
+    
+binaryqualified:
+      VARIABLE COLON INTEGER optbinaryqualifier 		{ ['binary-qualified', $_[1], $_[3], $_[4]] }
+    ;
+
+# These are not full nodes.
+optbinaryqualifier:
+								{ undef }
+    | DIVIDE binaryqualifier					{ $_[2] }
+    ;
+
+binaryqualifier:
+      ATOM
+    | binaryqualifier SUBTRACT ATOM				{ "$_[1]-$_[3]" }
     ;
 
 receive:

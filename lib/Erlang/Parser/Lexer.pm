@@ -14,27 +14,38 @@ use Parse::Lex;
 our $lexer_string = '';
 our $skip_token = 0;
 
-our ($EXTFUN, $INTCALL, $ATOM, $INTEGER, $DIRECTIVE, $LIT, $STRING, $CONTENT);
+our ($EXTFUN, $INTCALL, $ATOM, $FLOAT, $INTEGER, $BASE_INTEGER, $DIRECTIVE, $LIT, $STRING, $CONTENT);
 our ($ACONTENT, $ALIT, $AATOM, $OPENATOM);
 our ($OPENRECORD, $RECORDACCESS);
-our ($OPENSTRING, $WHITESPACE, $COMMENT, $LPAREN, $RPAREN, $PERIOD, $RARROW);
+our ($OPENSTRING, $WHITESPACE, $COMMENT, $LPAREN, $RPAREN, $PERIOD, $LARROW, $LDARROW, $RARROW);
 our ($LISTOPEN, $LISTCLOSE, $DIVIDE, $ADD, $SUBTRACT, $MULTIPLY, $COMMA, $SEMICOLON, $COLON);
 our ($ERROR, $VARIABLE, $MACRO, $TUPLEOPEN, $TUPLECLOSE, $TODODIRECTIVE, $EQUALS);
-our ($KW_CASE, $KW_RECEIVE, $KW_AFTER, $KW_OF, $KW_END, $KW_FUN);
-our ($OPENBINARY, $CLOSEBINARY);
+our ($KW_CASE, $KW_RECEIVE, $KW_AFTER, $KW_OF, $KW_END, $KW_FUN, $KW_WHEN, $KW_DIV);
+our ($OPENBINARY, $CLOSEBINARY, $LISTADD, $LISTSUBTRACT, $EQUALITY, $NOT_EQUAL);
+our ($KW_BSL, $KW_BSR, $KW_BOR, $KW_BAND, $KW_BXOR, $KW_REM, $LTE, $GTE, $LT, $GT);
+our ($SEND, $LITERAL, $PIPE, $COMPREHENSION);
 
 our @tokens = (
-    EXTFUN		=> q/(\w+):(\w+)\/(\d+)/,
     KW_CASE		=> q/case(?!\w)/,
     KW_RECEIVE		=> q/receive(?!\w)/,
     KW_AFTER		=> q/after(?!\w)/,
     KW_OF		=> q/of(?!\w)/,
     KW_END		=> q/end(?!\w)/,
     KW_FUN		=> q/fun(?!\w)/,
+    KW_WHEN		=> q/when(?!\w)/,
+    KW_DIV		=> q/div(?!\w)/,
+    KW_BSL		=> q/bsl(?!\w)/,
+    KW_BSR		=> q/bsr(?!\w)/,
+    KW_BOR		=> q/bor(?!\w)/,
+    KW_BAND		=> q/band(?!\w)/,
+    KW_BXOR		=> q/bxor(?!\w)/,
+    KW_REM		=> q/rem(?!\w)/,
     INTCALL		=> q/(\w+)\(/,
     ATOM		=> q/[a-z]([\w@.]+\w|\w)/,
     VARIABLE		=> q/[A-Z_]\w*/,
     MACRO		=> q/\?(\w+)/,
+    FLOAT		=> q/\d+\.\d+/,
+    BASE_INTEGER	=> q/\d+#[a-zA-Z0-9]+/,
     INTEGER		=> q/\d+/,
     TODODIRECTIVE	=> [q/-(type|opaque|spec)/, q/[^.]+/, q/\./], sub {
 	$skip_token = 1;
@@ -86,13 +97,19 @@ our @tokens = (
     LPAREN		=> q/\(/,
     RPAREN		=> q/\)/,
     PERIOD		=> q/\./,
+    LARROW		=> q/<-/,
     RARROW		=> q/->/,
+    LDARROW		=> q/<=/,
+    LTE			=> q/=</,
+    GTE			=> q/>=/,
     LISTOPEN		=> q/\[/,
     LISTCLOSE		=> q/\]/,
     TUPLEOPEN		=> q/{/,
     TUPLECLOSE		=> q/}/,
     LISTSUBTRACT	=> q/--/,
     LISTADD		=> q/\+\+/,
+    EQUALITY		=> q/==/,
+    NOT_EQUAL		=> q/=\/=/,
     EQUALS		=> q/=/,
     DIVIDE		=> q/\//,
     ADD			=> q/\+/,
@@ -103,6 +120,12 @@ our @tokens = (
     COLON		=> q/:/,
     OPENBINARY		=> q/<</,
     CLOSEBINARY		=> q/>>/,
+    LT			=> q/</,
+    GT			=> q/>/,
+    COMPREHENSION	=> q/\|\|/,
+    PIPE		=> q/\|/,
+    SEND		=> q/!/,
+    LITERAL		=> q/\$./,
     ERROR		=> q/.*/, sub { die qq{can't analyse: "$_[1]"} },
 );
 
