@@ -81,6 +81,8 @@ sub print_node {
 	$class->print_node($fh, @{$_[1]});
     } elsif ($kind eq 'integer') {
 	print $fh $_[0];
+    } elsif ($kind eq 'float') {
+	print $fh $_[0];
     } elsif ($kind eq 'deflist') {
 	my $first = 1;
 	foreach (@{$_[0]}) {
@@ -89,7 +91,7 @@ sub print_node {
 	}
 	print $fh ".\n";
     } elsif ($kind eq 'def') {
-	my ($name, $args, $stmts) = @_;
+	my ($name, $args, $whens, $stmts) = @_;
 	print $fh "$name(";
     
 	my $first = 1;
@@ -100,7 +102,19 @@ sub print_node {
 	
 	$depth++;
 
-	print $fh ") ->\n", "\t" x $depth;
+	print $fh ") ";
+
+	if (@$whens) {
+	    print $fh 'when ';
+	    $first = 1;
+	    foreach (@$whens) {
+		if ($first) { $first = 0 } else { print $fh ', ' }
+		$class->print_node($fh, @$_);
+	    }
+	    print $fh ' ';
+	}
+	
+	print $fh "->\n", "\t" x $depth;
 	$first = 1;
 	foreach (@$stmts) {
 	    if ($first) { $first = 0 } else { print $fh ",\n", "\t" x $depth }
@@ -302,8 +316,74 @@ sub print_node {
 	print $fh '--';
 	$class->print_node($fh, @{$_[1]});
 	print $fh ')';
+    } elsif ($kind eq 'lte') {
+	$class->print_node($fh, @{$_[0]});
+	print $fh ' =< ';
+	$class->print_node($fh, @{$_[1]});
+    } elsif ($kind eq 'gte') {
+	$class->print_node($fh, @{$_[0]});
+	print $fh ' >= ';
+	$class->print_node($fh, @{$_[1]});
+    } elsif ($kind eq 'lt') {
+	$class->print_node($fh, @{$_[0]});
+	print $fh ' < ';
+	$class->print_node($fh, @{$_[1]});
+    } elsif ($kind eq 'gt') {
+	$class->print_node($fh, @{$_[0]});
+	print $fh ' > ';
+	$class->print_node($fh, @{$_[1]});
+    } elsif ($kind eq 'base-integer') {
+	print $fh $_[0];
+    } elsif ($kind eq 'comprehension') {
+	print $fh '[';
+	$class->print_node($fh, @{$_[0]});
+	print $fh ' || ';
+	
+	my $first = 1;
+	foreach (@{$_[1]}) {
+	    if ($first) { $first = 0 } else { print $fh ', ' }
+	    $class->print_node($fh, @$_);
+	}
+	print $fh ']';
+    } elsif ($kind eq 'larrow') {
+	$class->print_node($fh, @{$_[0]});
+	print $fh ' <- ';
+	$class->print_node($fh, @{$_[1]});
+    } elsif ($kind eq 'ldarrow') {
+	$class->print_node($fh, @{$_[0]});
+	print $fh ' <= ';
+	$class->print_node($fh, @{$_[1]});
+    } elsif ($kind eq 'not-equal') {
+	$class->print_node($fh, @{$_[0]});
+	print $fh ' =/= ';
+	$class->print_node($fh, @{$_[1]});
+    } elsif ($kind eq 'equality') {
+	$class->print_node($fh, @{$_[0]});
+	print $fh ' == ';
+	$class->print_node($fh, @{$_[1]});
+    } elsif ($kind eq 'bor' or $kind eq 'band' or $kind eq 'bxor' or
+	     $kind eq 'bsl' or $kind eq 'bsr' or
+	     $kind eq 'div' or $kind eq 'rem') {
+	print $fh '(';
+	$class->print_node($fh, @{$_[0]});
+	print $fh " $kind ";
+	$class->print_node($fh, @{$_[1]});
+	print $fh ')';
+    } elsif ($kind eq 'binary-qualified') {
+	print $fh "$_[0]:$_[1]";
+	print $fh "/$_[2]" if defined $_[2];
+    } elsif ($kind eq 'send') {
+	print $fh '(';
+	$class->print_node($fh, @{$_[0]});
+	print $fh ' ! ';
+	$class->print_node($fh, @{$_[1]});
+	print $fh ')';
+    } elsif ($kind eq 'literal') {
+	print $fh '$';
+	print $fh chr($_[0]);
     } else {
 	print $fh "??<", Dumper($kind), ">??";
+	exit 5;
     }
 }
 

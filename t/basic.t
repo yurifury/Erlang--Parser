@@ -6,7 +6,7 @@ use 5.014;
 
 use Erlang::Parser;
 
-use Test::Simple tests => 4;
+use Test::Simple tests => 5;
 
 my $data = do { local $/; <DATA> };
 my @nodes = Erlang::Parser->parse($data);
@@ -29,6 +29,8 @@ Erlang::Parser->print_nodes($fh2, @pp_nodes);
 close $fh2;
 
 ok( $pp2,		'the parsed pretty-printed test data should pretty-print' );
+
+ok( $pp eq $pp2,	'the pretty-printed test data should equal the pretty-printed parsed pretty-printed test data' );
 
 __END__
 
