@@ -25,6 +25,10 @@ DESCRIPTION
                 'myfun(X, Y) -> X + Y.',
             );
 
+    "error"
+        Called when an error occurs. Reports based on the parser given as
+        the first argument.
+
     "print_nodes"
         Prints the given nodes.
 
