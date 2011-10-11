@@ -117,13 +117,13 @@ sub print_node {
 	    $class->print_node($fh, @$_);
 	}
 	print $fh ')';
-    } elsif ($kind eq 'extcall' or $kind eq 'extcall-macro') {
+    } elsif ($kind eq 'extcall' or $kind eq 'extcall-macro' or $kind eq 'extcall-var') {
 	my ($mod, $fun, $args) = @_;
 
-	if ($kind eq 'extcall') {
-	    print $fh $mod;
-	} else {
+	if ($kind eq 'extcall-macro') {
 	    print $fh "?$mod";
+	} else {
+	    print $fh $mod;
 	}
 
 	print $fh ":$fun(";
@@ -210,6 +210,10 @@ sub print_node {
 	print $fh "fun ?$_[0]:";
 	$class->print_node($fh, 'atom', $_[1]);
 	print $fh "/$_[2]";
+    } elsif ($kind eq 'fun-ext-var') {
+	print $fh "fun $_[0]:";
+	$class->print_node($fh, 'atom', $_[1]);
+	print $fh "/$_[2]";
     } elsif ($kind eq 'fun-int') {
 	print $fh "fun $_[0]/$_[1]";
     } elsif ($kind eq 'record-new') {
@@ -286,6 +290,18 @@ sub print_node {
 	}
 	
 	print $fh "\n", "\t" x $depth, "end";
+    } elsif ($kind eq 'list-add') {
+	print $fh '(';
+	$class->print_node($fh, @{$_[0]});
+	print $fh '++';
+	$class->print_node($fh, @{$_[1]});
+	print $fh ')';
+    } elsif ($kind eq 'list-subtract') {
+	print $fh '(';
+	$class->print_node($fh, @{$_[0]});
+	print $fh '--';
+	$class->print_node($fh, @{$_[1]});
+	print $fh ')';
     } else {
 	print $fh "??<", Dumper($kind), ">??";
     }
