@@ -23,7 +23,8 @@ our ($ERROR, $VARIABLE, $MACRO, $TUPLEOPEN, $TUPLECLOSE, $TODODIRECTIVE, $EQUALS
 our ($KW_CASE, $KW_RECEIVE, $KW_AFTER, $KW_OF, $KW_END, $KW_FUN, $KW_WHEN, $KW_DIV);
 our ($OPENBINARY, $CLOSEBINARY, $LISTADD, $LISTSUBTRACT, $EQUALITY, $NOT_EQUAL, $STRICTLY_EQUAL);
 our ($KW_BSL, $KW_BSR, $KW_BOR, $KW_BAND, $KW_BXOR, $KW_REM, $KW_TRY, $KW_CATCH, $LTE, $GTE, $LT, $GT);
-our ($SEND, $LITERAL, $PIPE, $COMPREHENSION, $CATCH_CLASS, $KW_ANDALSO, $KW_ORELSE);
+our ($SEND, $LITERAL, $PIPE, $COMPREHENSION, $CATCH_CLASS, $KW_ANDALSO, $KW_ORELSE, $KW_AND, $KW_OR, $KW_BEGIN);
+our ($KW_NOT);
 
 our @tokens = (
     KW_CASE		=> q/case(?!\w)/,
@@ -43,16 +44,20 @@ our @tokens = (
     KW_TRY		=> q/try(?!\w)/,
     KW_CATCH		=> q/catch(?!\w)/,
     KW_ANDALSO		=> q/andalso(?!\w)/,
+    KW_AND		=> q/and(?!\w)/,
     KW_ORELSE		=> q/orelse(?!\w)/,
+    KW_OR		=> q/or(?!\w)/,
+    KW_BEGIN		=> q/begin(?!\w)/,
+    KW_NOT		=> q/not(?!\w)/,
     CATCH_CLASS		=> q/(error|exit|throw):/,
     INTCALL		=> q/(\w+)\(/,
     ATOM		=> q/[a-z]([\w@.]*\w)?/,
     VARIABLE		=> q/[A-Z_]\w*/,
     MACRO		=> q/\?(\w+)/,
-    FLOAT		=> q/\d+\.\d+/,
-    BASE_INTEGER	=> q/\d+#[a-zA-Z0-9]+/,
-    INTEGER		=> q/\d+/,
-    TODODIRECTIVE	=> [q/-(type|opaque|spec)/, q/[^.]+/, q/\./], sub {
+    FLOAT		=> q/-?\d+\.\d+/,
+    BASE_INTEGER	=> q/-?\d+#[a-zA-Z0-9]+/,
+    INTEGER		=> q/-?\d+/,
+    TODODIRECTIVE	=> [q/-(type|opaque|spec|if|endif)/, q/[^.]*/, q/\./], sub {
 	$skip_token = 1;
     },
     DIRECTIVE		=> q/-(\w+)\(/,
@@ -131,7 +136,7 @@ our @tokens = (
     COMPREHENSION	=> q/\|\|/,
     PIPE		=> q/\|/,
     SEND		=> q/!/,
-    LITERAL		=> q/\$./,
+    LITERAL		=> q/\$(\\\\.|.)/,
     ERROR		=> q/.*/, sub { die qq{can't analyse: "$_[1]"} },
 );
 

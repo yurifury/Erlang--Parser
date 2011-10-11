@@ -377,7 +377,8 @@ sub print_node {
 	$class->print_node($fh, @{$_[1]});
 	print $fh ')';
     } elsif ($kind eq 'binary-qualified') {
-	print $fh "$_[0]:$_[1]";
+	print $fh "$_[0]";
+	print $fh ":$_[1]" if defined $_[1];
 	print $fh "/$_[2]" if defined $_[2];
     } elsif ($kind eq 'send') {
 	print $fh '(';

@@ -2,12 +2,14 @@
 # This is free software; you can redistribute it and/or modify it under the
 # same terms as Perl itself.
 
-%nonassoc EQUALS EQUALITY NOT_EQUAL LARROW LDARROW LTE GTE LT GT STRICTLY_EQUAL KW_ANDALSO KW_ORELSE
+%left KW_ANDALSO KW_ORELSE
+%nonassoc EQUALS EQUALITY NOT_EQUAL LARROW LDARROW LTE GTE LT GT STRICTLY_EQUAL
 %right SEND
-%left KW_BAND KW_BOR KW_BXOR
-%left KW_BSL KW_BSR
+%left KW_OR KW_BOR KW_BXOR
+%left KW_BSL KW_BSR KW_AND KW_BAND
 %left ADD SUBTRACT
 %left DIVIDE KW_DIV MULTIPLY KW_REM
+%right KW_NOT
 %right LISTADD LISTSUBTRACT
 
 %%
@@ -37,7 +39,9 @@ def:
 whenlist:
 				{ ['whenlist', []] }
     | KW_WHEN expr		{ ['whenlist', [$_[2]]] }
+    # TODO differentiate these. (a;b,c (A)||(B&&C))
     | whenlist COMMA expr	{ ['whenlist', [@{$_[1]->[1]}, $_[3]]] }
+    | whenlist SEMICOLON expr	{ ['whenlist', [@{$_[1]->[1]}, $_[3]]] }
     ;
 
 stmtlist:
@@ -67,6 +71,7 @@ expr:
     | receive
     | comprehension
     | try
+    | KW_BEGIN exprlist KW_END	{ ['begin', $_[2]->[1]] }
     | expr SEND expr		{ ['send', $_[1], $_[3]] }
     | expr LT expr		{ ['lt', $_[1], $_[3]] }
     | expr LTE expr		{ ['lte', $_[1], $_[3]] }
@@ -91,12 +96,16 @@ expr:
     | expr KW_REM expr		{ ['rem', $_[1], $_[3]] }
     | expr KW_ANDALSO expr	{ ['andalso', $_[1], $_[3]] }
     | expr KW_ORELSE expr	{ ['orelse', $_[1], $_[3]] }
+    | expr KW_AND expr		{ ['and', $_[1], $_[3]] }
+    | expr KW_OR expr		{ ['or', $_[1], $_[3]] }
+    | KW_NOT expr		{ ['not', $_[2]] }
 
     # TODO: unhack this.
     | expr LARROW expr		{ ['larrow', $_[1], $_[3]] }
     | expr LDARROW expr		{ ['ldarrow', $_[1], $_[3]] }
 
-    | INTCALL exprlist RPAREN	{ ['intcall', substr($_[1], 0, -1), $_[2]->[1]] }
+    | INTCALL exprlist RPAREN		{ ['intcall', substr($_[1], 0, -1), $_[2]->[1]] }
+    | MACRO LPAREN exprlist RPAREN	{ ['macro-call', substr($_[1], 1), $_[3]->[1]] }
     | extcall
     | LPAREN expr RPAREN	{ $_[2] }
     ;
@@ -146,7 +155,7 @@ altlist:
     ;
 
 alt:
-      expr RARROW stmtlist	{ ['alt', $_[1], $_[3]->[1]] }
+      expr whenlist RARROW stmtlist	{ ['alt', $_[1], $_[2]->[1], $_[4]->[1]] }
     ;
 
 fun:
@@ -177,10 +186,15 @@ binaryexpr:
     ;
     
 binaryqualified:
-      VARIABLE COLON INTEGER optbinaryqualifier 		{ ['binary-qualified', $_[1], $_[3], $_[4]] }
+      VARIABLE optbinarysize optbinaryqualifier 		{ ['binary-qualified', $_[1], $_[2], $_[3]] }
     ;
 
 # These are not full nodes.
+optbinarysize:
+								{ undef }
+    | COLON immexpr						{ $_[2] }
+    ;
+
 optbinaryqualifier:
 								{ undef }
     | DIVIDE binaryqualifier					{ $_[2] }
@@ -205,6 +219,7 @@ try:
       KW_TRY exprlist opttryof opttrycatch opttryafter KW_END	{ ['try', $_[2]->[1], $_[3], $_[4], $_[5]] }
     ;
 
+# These are not full nodes.
 opttryof:
 								{ undef }
     | KW_OF altlist						{ $_[2]->[1] }
@@ -226,8 +241,8 @@ catchaltlist:
     ;
 
 catchalt:
-      CATCH_CLASS expr RARROW stmtlist	{ ['catchalt', substr($_[1], 0, -1), $_[2], $_[4]->[1]] }
-    | expr RARROW stmtlist		{ ['catchalt', undef, $_[1], $_[3]->[1]] }
+      CATCH_CLASS expr whenlist RARROW stmtlist	{ ['catchalt', substr($_[1], 0, -1), $_[2], $_[3]->[1], $_[5]->[1]] }
+    | expr whenlist RARROW stmtlist		{ ['catchalt', undef, $_[1], $_[2]->[1], $_[4]->[1]] }
     ;
 %%
 
