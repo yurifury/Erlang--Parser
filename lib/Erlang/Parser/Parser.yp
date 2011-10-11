@@ -71,6 +71,7 @@ expr:
 extcall:
       ATOM COLON INTCALL exprlist RPAREN	{ ['extcall', $_[1], substr($_[3], 0, -1), $_[4]->[1]] }
     | MACRO COLON INTCALL exprlist RPAREN	{ ['extcall-macro', substr($_[1], 1), substr($_[3], 0, -1), $_[4]->[1]] }
+    | VARIABLE COLON INTCALL exprlist RPAREN	{ ['extcall-var', $_[1], substr($_[3], 0, -1), $_[4]->[1]] }
     ;
 
 list:
@@ -98,6 +99,7 @@ fun:
       KW_FUN LPAREN exprlist RPAREN RARROW stmtlist KW_END	{ ['fun-local', $_[3]->[1], $_[6]->[1]] }
     | KW_FUN ATOM COLON ATOM DIVIDE INTEGER			{ ['fun-ext', $_[2], $_[4], $_[6]] }
     | KW_FUN MACRO COLON ATOM DIVIDE INTEGER			{ ['fun-ext-macro', substr($_[2], 1), $_[4], $_[6]] }
+    | KW_FUN VARIABLE COLON ATOM DIVIDE INTEGER			{ ['fun-ext-var', $_[2], $_[4], $_[6]] }
     | KW_FUN ATOM DIVIDE INTEGER				{ ['fun-int', $_[2], $_[4]] }
     ;
 
