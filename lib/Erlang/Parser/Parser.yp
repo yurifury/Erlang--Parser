@@ -2,8 +2,9 @@
 # This is free software; you can redistribute it and/or modify it under the
 # same terms as Perl itself.
 
+%nonassoc KW_CATCH
 %left KW_ANDALSO KW_ORELSE
-%nonassoc EQUALS EQUALITY NOT_EQUAL LARROW LDARROW LTE GTE LT GT STRICTLY_EQUAL
+%nonassoc EQUALS EQUALITY NOT_EQUAL LARROW LDARROW LTE GTE LT GT STRICTLY_EQUAL NOT_QUITE_EQUAL
 %right SEND
 %left KW_OR KW_BOR KW_BXOR
 %left KW_BSL KW_BSR KW_AND KW_BAND
@@ -71,6 +72,7 @@ expr:
     | receive
     | comprehension
     | try
+    | if
     | KW_BEGIN exprlist KW_END	{ ['begin', $_[2]->[1]] }
     | expr SEND expr		{ ['send', $_[1], $_[3]] }
     | expr LT expr		{ ['lt', $_[1], $_[3]] }
@@ -88,6 +90,7 @@ expr:
     | expr EQUALITY expr	{ ['equality', $_[1], $_[3]] }
     | expr STRICTLY_EQUAL expr	{ ['strictly-equal', $_[1], $_[3]] }
     | expr NOT_EQUAL expr	{ ['not-equal', $_[1], $_[3]] }
+    | expr NOT_QUITE_EQUAL expr	{ ['not-quite_equal', $_[1], $_[3]] }
     | expr KW_BSL expr		{ ['bsl', $_[1], $_[3]] }
     | expr KW_BSR expr		{ ['bsr', $_[1], $_[3]] }
     | expr KW_BOR expr		{ ['bor', $_[1], $_[3]] }
@@ -99,6 +102,7 @@ expr:
     | expr KW_AND expr		{ ['and', $_[1], $_[3]] }
     | expr KW_OR expr		{ ['or', $_[1], $_[3]] }
     | KW_NOT expr		{ ['not', $_[2]] }
+    | KW_CATCH expr		{ ['catch-expr', $_[2]] }
 
     # TODO: unhack this.
     | expr LARROW expr		{ ['larrow', $_[1], $_[3]] }
@@ -159,11 +163,11 @@ alt:
     ;
 
 fun:
-      KW_FUN LPAREN exprlist RPAREN RARROW stmtlist KW_END	{ ['fun-local', $_[3]->[1], $_[6]->[1]] }
-    | KW_FUN ATOM COLON ATOM DIVIDE INTEGER			{ ['fun-ext', $_[2], $_[4], $_[6]] }
-    | KW_FUN MACRO COLON ATOM DIVIDE INTEGER			{ ['fun-ext-macro', substr($_[2], 1), $_[4], $_[6]] }
-    | KW_FUN VARIABLE COLON ATOM DIVIDE INTEGER			{ ['fun-ext-var', $_[2], $_[4], $_[6]] }
-    | KW_FUN ATOM DIVIDE INTEGER				{ ['fun-int', $_[2], $_[4]] }
+      KW_FUN LPAREN exprlist RPAREN whenlist RARROW stmtlist KW_END	{ ['fun-local', $_[3]->[1], $_[5]->[1], $_[7]->[1]] }
+    | KW_FUN ATOM COLON ATOM DIVIDE INTEGER				{ ['fun-ext', $_[2], $_[4], $_[6]] }
+    | KW_FUN MACRO COLON ATOM DIVIDE INTEGER				{ ['fun-ext-macro', substr($_[2], 1), $_[4], $_[6]] }
+    | KW_FUN VARIABLE COLON ATOM DIVIDE INTEGER				{ ['fun-ext-var', $_[2], $_[4], $_[6]] }
+    | KW_FUN ATOM DIVIDE INTEGER					{ ['fun-int', $_[2], $_[4]] }
     ;
 
 newrecord:
@@ -243,6 +247,24 @@ catchaltlist:
 catchalt:
       CATCH_CLASS expr whenlist RARROW stmtlist	{ ['catchalt', substr($_[1], 0, -1), $_[2], $_[3]->[1], $_[5]->[1]] }
     | expr whenlist RARROW stmtlist		{ ['catchalt', undef, $_[1], $_[2]->[1], $_[4]->[1]] }
+    ;
+
+if:
+      KW_IF iflist KW_END			{ ['if', $_[2]->[1]] }
+    ;
+
+iflist:
+      ifexpr			{ ['iflist', [$_[1]]] }
+    | iflist SEMICOLON ifexpr	{ ['iflist', [@{$_[1]->[1]}, $_[3]]] }
+    ;
+
+ifexpr:
+      ifseq RARROW stmtlist	{ ['ifexpr', $_[1], $_[3]->[1]] }
+    ;
+
+ifseq:
+      expr		{ ['ifseq', [$_[2]]] }
+    | ifseq COMMA expr	{ ['ifseq', [@{$_[1]->[1]}, $_[3]]] }
     ;
 %%
 
