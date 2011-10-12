@@ -13,6 +13,7 @@
 %right KW_NOT
 %right LISTADD LISTSUBTRACT
 
+
 %%
 
 # TODO: A few of these lists are flawed in that their optional type isn't done correctly
@@ -34,7 +35,7 @@ deflist:
     ;
 
 def:
-      INTCALL exprlist RPAREN whenlist RARROW stmtlist	{ ['def', substr($_[1], 0, -1), $_[2]->[1], $_[4]->[1], $_[6]->[1]] }
+      ATOM LPAREN exprlist RPAREN whenlist RARROW stmtlist	{ ['def', $_[1], $_[3]->[1], $_[5]->[1], $_[7]->[1]] }
     ;
 
 whenlist:
@@ -59,15 +60,10 @@ exprlist:
     | exprlist COMMA expr	{ ['exprlist', [@{$_[1]->[1]}, $_[3]]] }
     ;
 
-expr:
-      ATOM			{ ['atom', $_[1]] }
-    | FLOAT			{ ['float', $_[1]] }
-    | immexpr
-    | list
-    | tuple
+unparenexpr:
+      immexpr
     | case
     | fun
-    | newrecord
     | binary
     | receive
     | comprehension
@@ -108,15 +104,27 @@ expr:
     | expr LARROW expr		{ ['larrow', $_[1], $_[3]] }
     | expr LDARROW expr		{ ['ldarrow', $_[1], $_[3]] }
 
-    | INTCALL exprlist RPAREN		{ ['intcall', substr($_[1], 0, -1), $_[2]->[1]] }
-    | MACRO LPAREN exprlist RPAREN	{ ['macro-call', substr($_[1], 1), $_[3]->[1]] }
-    | extcall
-    | LPAREN expr RPAREN		{ $_[2] }
-    | expr LPAREN exprlist RPAREN	{ ['expr-call', $_[1], $_[3]->[1]] }
+    | call
+    ;
+
+parenexpr:
+      LPAREN expr RPAREN		{ $_[2] }
+    ;
+
+expr:
+      unparenexpr
+    | parenexpr
+    ;
+
+parenorimm:
+      parenexpr
+    | immexpr
     ;
 
 immexpr:
-      BASE_INTEGER		{ ['base-integer', $_[1]] }
+      ATOM			{ ['atom', $_[1]] }
+    | FLOAT			{ ['float', $_[1]] }
+    | BASE_INTEGER		{ ['base-integer', $_[1]] }
     | INTEGER			{ ['integer', $_[1]] }
     | STRING			{ ['string', $_[1]] }
     | VARIABLE OPENRECORD ATOM  { ['variable-record-access', $_[1], $_[3]] }
@@ -124,12 +132,22 @@ immexpr:
     | VARIABLE			{ ['variable', $_[1]] }
     | MACRO			{ ['macro', substr($_[1], 1)] }
     | LITERAL			{ ['literal', ord(substr($_[1], 1))] }
+    | list
+    | tuple
+    | newrecord
+    ;
+
+call:
+      intcall
+    | extcall
+    ;
+
+intcall:
+      parenorimm LPAREN exprlist RPAREN		{ ['call', undef, $_[1], $_[3]->[1]] }
     ;
 
 extcall:
-      ATOM COLON INTCALL exprlist RPAREN	{ ['extcall', $_[1], substr($_[3], 0, -1), $_[4]->[1]] }
-    | MACRO COLON INTCALL exprlist RPAREN	{ ['extcall-macro', substr($_[1], 1), substr($_[3], 0, -1), $_[4]->[1]] }
-    | VARIABLE COLON INTCALL exprlist RPAREN	{ ['extcall-var', $_[1], substr($_[3], 0, -1), $_[4]->[1]] }
+      parenorimm COLON intcall 			{ ['call', $_[1], $_[3]->[2], $_[3]->[3]] }
     ;
 
 list:
@@ -176,22 +194,21 @@ newrecord:
     ;
 
 binary:
-      OPENBINARY binarylist CLOSEBINARY				{ ['binary', $_[2]->[1]] }
+      OPENBINARY optbinarylist CLOSEBINARY			{ ['binary', $_[2]->[1]] }
+    ;
+
+optbinarylist:
+     								{ ['binarylist', []] }
+    | binarylist
     ;
 
 binarylist:
-								{ ['binarylist', []] }
-    | binaryexpr						{ ['binarylist', [$_[1]]] }
+      binaryexpr						{ ['binarylist', [$_[1]]] }
     | binarylist COMMA binaryexpr				{ ['binarylist', [@{$_[1]->[1]}, $_[3]]] }
     ;
 
 binaryexpr:
-      immexpr
-    | binaryqualified
-    ;
-    
-binaryqualified:
-      VARIABLE optbinarysize optbinaryqualifier 		{ ['binary-qualified', $_[1], $_[2], $_[3]] }
+      parenorimm optbinarysize optbinaryqualifier 		{ ['binaryexpr', $_[1], $_[2], $_[3]] }
     ;
 
 # These are not full nodes.
