@@ -24,7 +24,7 @@ our ($KW_CASE, $KW_RECEIVE, $KW_AFTER, $KW_OF, $KW_END, $KW_FUN, $KW_WHEN, $KW_D
 our ($OPENBINARY, $CLOSEBINARY, $LISTADD, $LISTSUBTRACT, $EQUALITY, $NOT_EQUAL, $STRICTLY_EQUAL);
 our ($KW_BSL, $KW_BSR, $KW_BOR, $KW_BAND, $KW_BXOR, $KW_REM, $KW_TRY, $KW_CATCH, $LTE, $GTE, $LT, $GT);
 our ($SEND, $LITERAL, $PIPE, $COMPREHENSION, $CATCH_CLASS, $KW_ANDALSO, $KW_ORELSE, $KW_AND, $KW_OR, $KW_BEGIN);
-our ($KW_NOT, $KW_IF, $NOT_QUITE_EQUAL);
+our ($KW_NOT, $KW_IF, $NOT_QUITE_EQUAL, $NEG);
 
 our @tokens = (
     KW_CASE		=> q/case(?!\w)/,
@@ -50,14 +50,13 @@ our @tokens = (
     KW_BEGIN		=> q/begin(?!\w)/,
     KW_NOT		=> q/not(?!\w)/,
     KW_IF		=> q/if(?!\w)/,
-    CATCH_CLASS		=> q/(error|exit|throw):/,
     ATOM		=> q/[a-z]([\w@.]*\w)?/,
     VARIABLE		=> q/[A-Z_]\w*/,
     MACRO		=> q/\?(\w+)/,
-    FLOAT		=> q/-?\d+\.\d+([eE][+-]?\d+)?/,
-    BASE_INTEGER	=> q/-?\d+#[a-zA-Z0-9]+/,
-    INTEGER		=> q/-?\d+/,
-    TODODIRECTIVE	=> [q/-(type|opaque|spec|if|endif)/, q/[^.]*/, q/\./], sub {
+    FLOAT		=> q/\d+\.\d+([eE][+-]?\d+)?/,
+    BASE_INTEGER	=> q/\d+#[a-zA-Z0-9]+/,
+    INTEGER		=> q/\d+/,
+    TODODIRECTIVE	=> [q/-(type|opaque|spec|if|endif)/, q/.*?/, q/\.\s*($|[\r\n])/], sub {
 	$skip_token = 1;
     },
     DIRECTIVE		=> q/-(\w+)\(/,

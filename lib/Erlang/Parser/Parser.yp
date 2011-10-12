@@ -10,6 +10,7 @@
 %left KW_BSL KW_BSR KW_AND KW_BAND
 %left ADD SUBTRACT
 %left DIVIDE KW_DIV MULTIPLY KW_REM
+%left NEG
 %right KW_NOT
 %right LISTADD LISTSUBTRACT
 
@@ -97,6 +98,7 @@ unparenexpr:
     | expr KW_ORELSE expr	{ ['orelse', $_[1], $_[3]] }
     | expr KW_AND expr		{ ['and', $_[1], $_[3]] }
     | expr KW_OR expr		{ ['or', $_[1], $_[3]] }
+    | SUBTRACT expr %prec NEG	{ ['neg', $_[2]] }
     | KW_NOT expr		{ ['not', $_[2]] }
     | KW_CATCH expr		{ ['catch-expr', $_[2]] }
 
@@ -126,7 +128,7 @@ immexpr:
     | FLOAT			{ ['float', $_[1]] }
     | BASE_INTEGER		{ ['base-integer', $_[1]] }
     | INTEGER			{ ['integer', $_[1]] }
-    | STRING			{ ['string', $_[1]] }
+    | string
     | VARIABLE OPENRECORD ATOM  { ['variable-record-access', $_[1], $_[3]] }
     | VARIABLE newrecord	{ ['variable-record-update', $_[1], @{$_[2]}[1..2]] }
     | VARIABLE			{ ['variable', $_[1]] }
@@ -135,6 +137,11 @@ immexpr:
     | list
     | tuple
     | newrecord
+    ;
+
+string:
+      STRING			{ ['string', $_[1]] }
+    | string STRING		{ ['string', $_[1]->[1] . $_[2]] }
     ;
 
 call:
@@ -161,7 +168,8 @@ listcdr:
     ;
 
 comprehension:
-      LISTOPEN expr COMPREHENSION exprlist LISTCLOSE	{ ['comprehension', $_[2], $_[4]->[1]] }
+      LISTOPEN expr COMPREHENSION exprlist LISTCLOSE		{ ['comprehension', $_[2], $_[4]->[1]] }
+    | OPENBINARY binary COMPREHENSION exprlist CLOSEBINARY	{ ['binary-comprehension', $_[2], $_[4]->[1]] }
     ;
 
 tuple:
@@ -276,7 +284,8 @@ catchaltlist:
     ;
 
 catchalt:
-      CATCH_CLASS expr whenlist RARROW stmtlist	{ ['catchalt', substr($_[1], 0, -1), $_[2], $_[3]->[1], $_[5]->[1]] }
+      ATOM COLON expr whenlist RARROW stmtlist	{ ['catchalt', substr($_[1], 0, -1), $_[3], $_[4]->[1], $_[6]->[1]] }
+    | VARIABLE COLON expr whenlist RARROW stmtlist	{ ['catchalt', substr($_[1], 0, -1), $_[3], $_[4]->[1], $_[6]->[1]] }
     | expr whenlist RARROW stmtlist		{ ['catchalt', undef, $_[1], $_[2]->[1], $_[4]->[1]] }
     ;
 
