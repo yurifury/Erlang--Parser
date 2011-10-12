@@ -69,6 +69,11 @@ sub print_node {
 	print $fh '+';
 	$class->print_node($fh, @{$_[1]});
 	print $fh ')';
+    } elsif ($kind eq 'neg') {
+	print $fh '(';
+	print $fh '-';
+	$class->print_node($fh, @{$_[0]});
+	print $fh ')';
     } elsif ($kind eq 'subtract') {
 	print $fh '(';
 	$class->print_node($fh, @{$_[0]});
@@ -122,34 +127,16 @@ sub print_node {
 	}
 
 	$depth--;
-    } elsif ($kind eq 'intcall') {
-	my ($fun, $args) = @_;
-	print $fh "$fun(";
-	my $first = 1;
-	foreach (@$args) {
-	    if ($first) { $first = 0 } else { print $fh ', ' }
-	    $class->print_node($fh, @$_);
-	}
-	print $fh ')';
-    } elsif ($kind eq 'expr-call') {
-	$class->print_node($fh, @{$_[0]});
-	print $fh '(';
-	my $first = 1;
-	foreach (@{$_[1]}) {
-	    if ($first) { $first = 0 } else { print $fh ', ' }
-	    $class->print_node($fh, @$_);
-	}
-	print $fh ')';
-    } elsif ($kind eq 'extcall' or $kind eq 'extcall-macro' or $kind eq 'extcall-var') {
+    } elsif ($kind eq 'call') {
 	my ($mod, $fun, $args) = @_;
 
-	if ($kind eq 'extcall-macro') {
-	    print $fh "?$mod";
-	} else {
-	    print $fh $mod;
+	if (defined $mod) {
+	    $class->print_node($fh, @$mod);
+	    print $fh ':';
 	}
 
-	print $fh ":$fun(";
+	$class->print_node($fh, @$fun);
+	print $fh '(';
 	my $first = 1;
 	foreach (@$args) {
 	    if ($first) { $first = 0 } else { print $fh ', ' }
@@ -193,12 +180,24 @@ sub print_node {
 	print $fh "\n", "\t" x $depth, "end";
     } elsif ($kind eq 'alt' or $kind eq 'catchalt') {
 	my $catchclass = $kind eq 'catchalt' ? shift : undef;
-	my ($expr, $stmts) = @_;
+	my ($expr, $whens, $stmts) = @_;
 
 	print $fh "$catchclass:" if $catchclass;
 	$class->print_node($fh, @$expr);
 	$depth++;
-	print $fh " ->\n", "\t" x $depth;
+	print $fh ' ';
+
+	if (@$whens) {
+	    print $fh 'when ';
+	    my $first = 1;
+	    foreach (@$whens) {
+		if ($first) { $first = 0 } else { print $fh ', ' }
+		$class->print_node($fh, @$_);
+	    }
+	    print $fh ' ';
+	}
+	
+	print $fh "->\n", "\t" x $depth;
 
 	my $first = 1;
 	foreach (@$stmts) {
@@ -208,20 +207,38 @@ sub print_node {
 
 	$depth--;
     } elsif ($kind eq 'fun-local') {
-	my ($exprs, $stmts) = @_;
-	print $fh 'fun(';
+	print $fh 'fun (';
 
-	my $first = 1;
-	foreach (@$exprs) {
-	    if ($first) { $first = 0 } else { print $fh ', ' }
-	    $class->print_node($fh, @$_);
-	}
+	my $outfirst = 1;
+	foreach (@{$_[0]}) {
+	    my ($exprs, $whens, $stmts) = @$_;
+	    if ($outfirst) { $outfirst = 0 } else { print $fh '; ' }
 
-	print $fh ') -> ';
-	$first = 1;
-	foreach (@$stmts) {
-	    if ($first) { $first = 0 } else { print $fh ', ' }
-	    $class->print_node($fh, @$_);
+	    my $first = 1;
+	    foreach (@$exprs) {
+		if ($first) { $first = 0 } else { print $fh ', ' }
+		$class->print_node($fh, @$_);
+	    }
+
+	    print $fh ') ';
+
+	    if (@$whens) {
+		print $fh 'when ';
+		$first = 1;
+		foreach (@$whens) {
+		    if ($first) { $first = 0 } else { print $fh ', ' }
+		    $class->print_node($fh, @$_);
+		}
+		print $fh ' ';
+	    }
+	   
+	    print $fh '-> ';
+	    $first = 1;
+	    foreach (@$stmts) {
+		if ($first) { $first = 0 } else { print $fh ', ' }
+		$class->print_node($fh, @$_);
+	    }
+
 	}
 
 	print $fh ' end';
@@ -280,6 +297,13 @@ sub print_node {
 	}
 
 	print $fh '>>';
+    } elsif ($kind eq 'binaryexpr') {
+	$class->print_node($fh, @{$_[0]});
+	if (defined $_[1]) {
+	    print $fh ':';
+	    $class->print_node($fh, @{$_[1]});
+	}
+	print $fh "/$_[2]" if defined $_[2];
     } elsif ($kind eq 'receive') {
 	my ($alts, $after) = @_;
 
@@ -376,19 +400,35 @@ sub print_node {
 	$class->print_node($fh, @{$_[0]});
 	print $fh ' =:= ';
 	$class->print_node($fh, @{$_[1]});
+    } elsif ($kind eq 'begin') {
+	print $fh "begin\n";
+
+	$depth++;
+	print $fh "\t" x $depth;
+
+	my $first = 1;
+	foreach (@{$_[0]}) {
+	    if ($first) { $first = 0 } else { print $fh ",\n", "\t" x $depth }
+	    $class->print_node($fh, @$_);
+	}
+
+	$depth--;
+
+	print $fh "\n", "\t" x $depth, 'end';
+    } elsif ($kind eq 'not') {
+	print $fh '(not ';
+	$class->print_node($fh, @{$_[0]});
+	print $fh ')';
     } elsif ($kind eq 'bor' or $kind eq 'band' or $kind eq 'bxor' or
 	     $kind eq 'bsl' or $kind eq 'bsr' or
 	     $kind eq 'div' or $kind eq 'rem' or
+	     $kind eq 'and' or $kind eq 'or' or
 	     $kind eq 'andalso' or $kind eq 'orelse') {
 	print $fh '(';
 	$class->print_node($fh, @{$_[0]});
 	print $fh " $kind ";
 	$class->print_node($fh, @{$_[1]});
 	print $fh ')';
-    } elsif ($kind eq 'binary-qualified') {
-	print $fh "$_[0]";
-	print $fh ":$_[1]" if defined $_[1];
-	print $fh "/$_[2]" if defined $_[2];
     } elsif ($kind eq 'send') {
 	print $fh '(';
 	$class->print_node($fh, @{$_[0]});
@@ -464,8 +504,12 @@ sub print_node {
 	}
     
 	print $fh "end";
+    } elsif ($kind eq 'catch-expr') {
+	print $fh 'catch(';
+	$class->print_node($fh, @{$_[0]});
+	print $fh ')';
     } else {
-	print $fh "??<", Dumper($kind), ">??";
+	print $fh "??<" . Dumper($kind) . ">??\n";
 	exit 5;
     }
 }

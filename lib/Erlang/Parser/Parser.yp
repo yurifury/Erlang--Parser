@@ -170,7 +170,7 @@ listcdr:
 
 comprehension:
       LISTOPEN expr COMPREHENSION exprlist LISTCLOSE		{ ['comprehension', $_[2], $_[4]->[1]] }
-    | OPENBINARY binary COMPREHENSION exprlist CLOSEBINARY	{ ['binary-comprehension', $_[2], $_[4]->[1]] }
+    | OPENBINARY binary COMPREHENSION exprlist CLOSEBINARY	{ ['binary-comprehension', $_[2]->[1], $_[4]->[1]] }
     ;
 
 tuple:
@@ -199,16 +199,17 @@ fun:
     ;
 
 funlocal:
-      KW_FUN funlocallist KW_END
+      KW_FUN funlocallist KW_END					{ ['fun-local', $_[2]] }
     ;
     
+# These are not full nodes.
 funlocallist:
-      funlocalexpr
-    | funlocallist SEMICOLON funlocalexpr
+      funlocalexpr							{ [$_[1]] }
+    | funlocallist SEMICOLON funlocalexpr				{ [@{$_[1]}, $_[3]] }
     ;
 
 funlocalexpr:
-      LPAREN exprlist RPAREN whenlist RARROW stmtlist 		{ ['fun-local', $_[2]->[1], $_[4]->[1], $_[6]->[1]] }
+      LPAREN exprlist RPAREN whenlist RARROW stmtlist 		{ [$_[2]->[1], $_[4]->[1], $_[6]->[1]] }
     ;
 
 newrecord:
@@ -216,17 +217,18 @@ newrecord:
     ;
 
 binary:
-      OPENBINARY optbinarylist CLOSEBINARY			{ ['binary', $_[2]->[1]] }
+      OPENBINARY optbinarylist CLOSEBINARY			{ ['binary', $_[2]] }
     ;
 
+# These are not full nodes.
 optbinarylist:
-     								{ ['binarylist', []] }
+     								{ [] }
     | binarylist
     ;
 
 binarylist:
-      binaryexpr						{ ['binarylist', [$_[1]]] }
-    | binarylist COMMA binaryexpr				{ ['binarylist', [@{$_[1]->[1]}, $_[3]]] }
+      binaryexpr						{ [$_[1]] }
+    | binarylist COMMA binaryexpr				{ [@{$_[1]}, $_[3]] }
     ;
 
 binaryexpr:
@@ -285,8 +287,8 @@ catchaltlist:
     ;
 
 catchalt:
-      ATOM COLON expr whenlist RARROW stmtlist	{ ['catchalt', substr($_[1], 0, -1), $_[3], $_[4]->[1], $_[6]->[1]] }
-    | VARIABLE COLON expr whenlist RARROW stmtlist	{ ['catchalt', substr($_[1], 0, -1), $_[3], $_[4]->[1], $_[6]->[1]] }
+      ATOM COLON expr whenlist RARROW stmtlist	{ ['catchalt', $_[1], $_[3], $_[4]->[1], $_[6]->[1]] }
+    | VARIABLE COLON expr whenlist RARROW stmtlist	{ ['catchalt', $_[1], $_[3], $_[4]->[1], $_[6]->[1]] }
     | expr whenlist RARROW stmtlist		{ ['catchalt', undef, $_[1], $_[2]->[1], $_[4]->[1]] }
     ;
 
