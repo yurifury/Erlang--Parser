@@ -131,6 +131,15 @@ sub print_node {
 	    $class->print_node($fh, @$_);
 	}
 	print $fh ')';
+    } elsif ($kind eq 'expr-call') {
+	$class->print_node($fh, @{$_[0]});
+	print $fh '(';
+	my $first = 1;
+	foreach (@{$_[1]}) {
+	    if ($first) { $first = 0 } else { print $fh ', ' }
+	    $class->print_node($fh, @$_);
+	}
+	print $fh ')';
     } elsif ($kind eq 'extcall' or $kind eq 'extcall-macro' or $kind eq 'extcall-var') {
 	my ($mod, $fun, $args) = @_;
 
