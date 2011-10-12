@@ -512,12 +512,13 @@ sub print_node {
 	print $fh "if\n";
 
 	$depth++;
+	print $fh "\t" x $depth;
 	my $outfirst = 1;
 	foreach (@{$_[0]}) {
 	    if ($outfirst) { $outfirst = 0 } else { print $fh ";\n", "\t" x $depth }
 
 	    my $first = 1;
-	    foreach (@{$_[0]}) {
+	    foreach (@{@$_[0]}) {
 		if ($first) { $first = 0 } else { print $fh ', ' }
 		$class->print_node($fh, @$_);
 	    }
@@ -527,7 +528,7 @@ sub print_node {
 	    print $fh "\t" x $depth;
 	    
 	    $first = 1;
-	    foreach (@{$_[1]}) {
+	    foreach (@{@$_[1]}) {
 		if ($first) { $first = 0 } else { print $fh ",\n", "\t" x $depth }
 		$class->print_node($fh, @$_);
 	    }
