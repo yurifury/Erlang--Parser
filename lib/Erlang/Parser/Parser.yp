@@ -293,21 +293,21 @@ catchalt:
     ;
 
 if:
-      KW_IF iflist KW_END			{ ['if', $_[2]->[1]] }
+      KW_IF iflist KW_END			{ ['if', $_[2]] }
     ;
 
 iflist:
-      ifexpr			{ ['iflist', [$_[1]]] }
-    | iflist SEMICOLON ifexpr	{ ['iflist', [@{$_[1]->[1]}, $_[3]]] }
+      ifexpr			{ [$_[1]] }
+    | iflist SEMICOLON ifexpr	{ [@{$_[1]}, $_[3]] }
     ;
 
 ifexpr:
-      ifseq RARROW stmtlist	{ ['ifexpr', $_[1], $_[3]->[1]] }
+      ifseq RARROW stmtlist	{ [$_[1], $_[3]->[1]] }
     ;
 
 ifseq:
-      expr		{ ['ifseq', [$_[2]]] }
-    | ifseq COMMA expr	{ ['ifseq', [@{$_[1]->[1]}, $_[3]]] }
+      expr		{ [$_[1]] }
+    | ifseq COMMA expr	{ [@{$_[1]}, $_[3]] }
     ;
 %%
 

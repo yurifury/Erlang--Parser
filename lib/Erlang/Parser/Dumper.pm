@@ -508,6 +508,34 @@ sub print_node {
 	print $fh 'catch(';
 	$class->print_node($fh, @{$_[0]});
 	print $fh ')';
+    } elsif ($kind eq 'if') {
+	print $fh "if\n";
+
+	$depth++;
+	my $outfirst = 1;
+	foreach (@{$_[0]}) {
+	    if ($outfirst) { $outfirst = 0 } else { print $fh ";\n", "\t" x $depth }
+
+	    my $first = 1;
+	    foreach (@{$_[0]}) {
+		if ($first) { $first = 0 } else { print $fh ', ' }
+		$class->print_node($fh, @$_);
+	    }
+	    print $fh " ->\n";
+
+	    $depth++;
+	    print $fh "\t" x $depth;
+	    
+	    $first = 1;
+	    foreach (@{$_[1]}) {
+		if ($first) { $first = 0 } else { print $fh ",\n", "\t" x $depth }
+		$class->print_node($fh, @$_);
+	    }
+	    $depth--;
+	}
+
+	$depth--;
+	print $fh "\n", "\t" x $depth, "end";
     } else {
 	print $fh "??<" . Dumper($kind) . ">??\n";
 	exit 5;
