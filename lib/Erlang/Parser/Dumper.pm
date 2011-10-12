@@ -380,6 +380,17 @@ sub print_node {
 	    $class->print_node($fh, @$_);
 	}
 	print $fh ']';
+    } elsif ($kind eq 'binary-comprehension') {
+	print $fh '<<';
+	$class->print_node($fh, @{$_[0]});
+	print $fh ' || ';
+	
+	my $first = 1;
+	foreach (@{$_[1]}) {
+	    if ($first) { $first = 0 } else { print $fh ', ' }
+	    $class->print_node($fh, @$_);
+	}
+	print $fh '>>';
     } elsif ($kind eq 'larrow') {
 	$class->print_node($fh, @{$_[0]});
 	print $fh ' <- ';

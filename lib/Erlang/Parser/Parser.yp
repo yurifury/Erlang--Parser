@@ -170,7 +170,7 @@ listcdr:
 
 comprehension:
       LISTOPEN expr COMPREHENSION exprlist LISTCLOSE		{ ['comprehension', $_[2], $_[4]->[1]] }
-    | OPENBINARY binary COMPREHENSION exprlist CLOSEBINARY	{ ['binary-comprehension', $_[2]->[1], $_[4]->[1]] }
+    | OPENBINARY binary COMPREHENSION exprlist CLOSEBINARY	{ ['binary-comprehension', $_[2], $_[4]->[1]] }
     ;
 
 tuple:
