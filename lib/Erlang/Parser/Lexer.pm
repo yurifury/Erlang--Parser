@@ -136,7 +136,7 @@ our @tokens = (
     COMPREHENSION	=> q/\|\|/,
     PIPE		=> q/\|/,
     SEND		=> q/!/,
-    LITERAL		=> q/\$(\\\\.|.)/,
+    LITERAL		=> q/\$(\\\\.|(?s:.))/,
     ERROR		=> q/.*/, sub { die qq{can't analyse: "$_[1]"} },
 );
 
