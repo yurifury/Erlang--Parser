@@ -164,7 +164,7 @@ sub lex {
 	    $skip_token = 0;
 	}
 
-	print STDERR $token->name, "(", $token->text, ") ";
+	# print STDERR $token->name, "(", $token->text, ") ";
 	return ($token->name, $token->text);
     }
 }
