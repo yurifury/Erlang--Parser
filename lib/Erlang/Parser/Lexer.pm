@@ -14,7 +14,7 @@ use Parse::Lex;
 our $lexer_string = '';
 our $skip_token = 0;
 
-our ($ATOM, $FLOAT, $INTEGER, $BASE_INTEGER, $DIRECTIVE, $LIT, $STRING, $CONTENT);
+our ($ATOM, $FLOAT, $INTEGER, $BASE_INTEGER, $LIT, $STRING, $CONTENT);
 our ($ACONTENT, $ALIT, $AATOM, $OPENATOM);
 our ($OPENRECORD, $RECORDACCESS);
 our ($OPENSTRING, $WHITESPACE, $COMMENT, $LPAREN, $RPAREN, $PERIOD, $LARROW, $LDARROW, $RARROW);
@@ -59,7 +59,6 @@ our @tokens = (
     TODODIRECTIVE	=> [q/-(type|opaque|spec|if|endif)/, q/.*?/, q/\.\s*($|[\r\n])/], sub {
 	$skip_token = 1;
     },
-    DIRECTIVE		=> q/-(\w+)\(/,
     OPENRECORD		=> q/#/,
     RECORDACCESS	=> q/\.(\w+)/,
 

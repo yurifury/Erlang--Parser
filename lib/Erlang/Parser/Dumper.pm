@@ -135,7 +135,9 @@ sub print_node {
 	    print $fh ':';
 	}
 
+	print $fh '(' if ${$fun}[0] ne 'atom';
 	$class->print_node($fh, @$fun);
+	print $fh ')' if ${$fun}[0] ne 'atom';
 	print $fh '(';
 	my $first = 1;
 	foreach (@$args) {
@@ -207,13 +209,14 @@ sub print_node {
 
 	$depth--;
     } elsif ($kind eq 'fun-local') {
-	print $fh 'fun (';
+	print $fh 'fun ';
 
 	my $outfirst = 1;
 	foreach (@{$_[0]}) {
 	    my ($exprs, $whens, $stmts) = @$_;
 	    if ($outfirst) { $outfirst = 0 } else { print $fh '; ' }
 
+	    print $fh '(';
 	    my $first = 1;
 	    foreach (@$exprs) {
 		if ($first) { $first = 0 } else { print $fh ', ' }
@@ -448,7 +451,7 @@ sub print_node {
 	print $fh ')';
     } elsif ($kind eq 'literal') {
 	print $fh '$';
-	print $fh chr($_[0]);
+	print $fh $_[0];
     } elsif ($kind eq 'try') {
 	my ($exprs, $alts, $catches, $afters) = @_;
 
@@ -459,7 +462,7 @@ sub print_node {
 
 	my $first = 1;
 	foreach (@$exprs) {
-	    if ($first) { $first = 0 } else { print $fh ";\n", "\t" x $depth }
+	    if ($first) { $first = 0 } else { print $fh ",\n", "\t" x $depth }
 	    $class->print_node($fh, @$_);
 	}
 
