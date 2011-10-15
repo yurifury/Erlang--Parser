@@ -36,7 +36,8 @@ sub print_node {
 	}
 	print $fh ").\n";
     } elsif ($kind eq 'atom') {
-	if (not $_[0] =~ /^[^a-z]|[^a-zA-Z_0-9]/) {
+	if (not $_[0] =~ /^[^a-z]|[^a-zA-Z_0-9]/
+	    and not $_[0] =~ /^(case|receive|after|of|end|fun|when|div|bs[lr]|bx?or|band|rem|try|catch|andalso|and|orelse|or|begin|not|if)$/) {
 	    print $fh "$_[0]";
 	} else {
 	    print $fh "'";
@@ -301,7 +302,9 @@ sub print_node {
 
 	print $fh '>>';
     } elsif ($kind eq 'binaryexpr') {
+	print $fh '(';
 	$class->print_node($fh, @{$_[0]});
+	print $fh ')';
 	if (defined $_[1]) {
 	    print $fh ':';
 	    $class->print_node($fh, @{$_[1]});
