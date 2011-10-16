@@ -6,7 +6,6 @@ package Erlang::Parser::Lexer;
 
 use strict;
 use warnings;
-use 5.014;
 
 use Parse::Lex;
 

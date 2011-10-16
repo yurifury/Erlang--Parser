@@ -6,7 +6,6 @@ package Erlang::Parser::Dumper;
 
 use strict;
 use warnings;
-use 5.014;
 
 use Data::Dumper;
 
