@@ -2,7 +2,7 @@ NAME
     Erlang::Parser - Erlang source code parser
 
 VERSION
-    Version 0.1
+    Version 0.2
 
 SYNOPSIS
         use Erlang::Parser;
