@@ -39,9 +39,11 @@ sub print_node {
 	    and not $_[0] =~ /^(case|receive|after|of|end|fun|when|div|bs[lr]|bx?or|band|rem|try|catch|andalso|and|orelse|or|begin|not|if)$/) {
 	    print $fh "$_[0]";
 	} else {
-	    print $fh "'";
-	    print $fh $_[0] =~ s/\\/\\\\/rg =~ s/'/\\'/rg;
-	    print $fh "'";
+	    my $atom = $_[0];
+	    $atom =~ s/\\/\\\\/g;
+	    $atom =~ s/'/\\'/g;
+
+	    print $fh "'$atom'";
 	}
     } elsif ($kind eq 'list') {
 	print $fh '[';
@@ -146,9 +148,11 @@ sub print_node {
 	}
 	print $fh ')';
     } elsif ($kind eq 'string') {
-	print $fh '"';
-	print $fh $_[0] =~ s/\\/\\\\/rg =~ s/"/\\"/rg;
-	print $fh '"';
+	my $string = $_[0];
+	$string =~ s/\\/\\\\/g;
+	$string =~ s/"/\\"/g;
+
+	print $fh "\"$string\"";
     } elsif ($kind eq 'variable') {
 	print $fh $_[0];
     } elsif ($kind eq 'macro') {
