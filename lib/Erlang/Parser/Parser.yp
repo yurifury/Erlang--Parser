@@ -15,6 +15,21 @@
 %right KW_NOT
 %right LISTADD LISTSUBTRACT
 
+%{
+    use Erlang::Parser::Node::Directive;
+    use Erlang::Parser::Node::DefList;
+    use Erlang::Parser::Node::Def;
+    use Erlang::Parser::Node::WhenList;
+
+    sub new_node {
+	my ($kind, @args) = @_;
+	do {
+	    no strict 'refs';
+	    my $class = "Erlang::Parser::Node::$kind";
+	    &{"${class}::new"}($class, @args)
+	}
+    }
+%}
 
 %%
 
@@ -27,39 +42,36 @@ root:
     ;
 
 rootstmt:
-      SUBTRACT ATOM LPAREN exprlist RPAREN PERIOD	{ ['directive', $_[2], $_[4]->[1]] }
+      SUBTRACT ATOM LPAREN exprlist RPAREN PERIOD	{ new_node 'Directive', $_[2], $_[4] }
     | deflist PERIOD					{ $_[1] }
     ;
 
 deflist:
-      def			{ ['deflist', [$_[1]]] }
-    | deflist SEMICOLON def	{ ['deflist', [@{$_[1]->[1]}, $_[3]]] }
+      def			{ new_node('DefList')->_append($_[1]) }
+    | deflist SEMICOLON def	{ $_[1]->_append($_[3]) }
     ;
 
 def:
-      ATOM LPAREN exprlist RPAREN whenlist RARROW stmtlist	{ ['def', $_[1], $_[3]->[1], $_[5]->[1], $_[7]->[1]] }
+      ATOM LPAREN exprlist RPAREN whenlist RARROW stmtlist	{ new_node 'Def', $_[1], $_[3], $_[5]->group, $_[7] }
     ;
 
 whenlist:
-				{ ['whenlist', []] }
-    | KW_WHEN expr		{ ['whenlist', [$_[2]]] }
+				{ new_node 'WhenList' }
+    | KW_WHEN expr		{ new_node('WhenList')->append($_[2]) }
     # TODO differentiate these. (a;b,c (A)||(B&&C))
-    | whenlist COMMA expr	{ ['whenlist', [@{$_[1]->[1]}, $_[3]]] }
-    | whenlist SEMICOLON expr	{ ['whenlist', [@{$_[1]->[1]}, $_[3]]] }
+    | whenlist COMMA expr	{ $_[1]->_append($_[3]) }
+    | whenlist SEMICOLON expr	{ $_[1]->_group->_append($_[3]) }
+    ;
+
+# somehow this is an idiom. exprlist = 0 or more. stmtlist = 1 or more.
+exprlist:
+				{ [] }
+    | stmtlist 			{ $_[1] }
     ;
 
 stmtlist:
-      stmt			{ ['stmtlist', [$_[1]]] }
-    | stmtlist COMMA stmt	{ ['stmtlist', [@{$_[1]->[1]}, $_[3]]] }
-    ;
-
-stmt:
-      expr;
-
-exprlist:
-				{ ['exprlist', []] }
-    | expr			{ ['exprlist', [$_[1]]] }
-    | exprlist COMMA expr	{ ['exprlist', [@{$_[1]->[1]}, $_[3]]] }
+      expr			{ [$_[1]] }
+    | stmtlist COMMA expr	{ [@{$_[1]}, $_[3]] }
     ;
 
 unparenexpr:
@@ -71,7 +83,7 @@ unparenexpr:
     | comprehension
     | try
     | if
-    | KW_BEGIN exprlist KW_END	{ ['begin', $_[2]->[1]] }
+    | KW_BEGIN exprlist KW_END	{ ['begin', $_[2]] }
     | expr SEND expr		{ ['send', $_[1], $_[3]] }
     | expr LT expr		{ ['lt', $_[1], $_[3]] }
     | expr LTE expr		{ ['lte', $_[1], $_[3]] }
@@ -151,7 +163,7 @@ call:
     ;
 
 intcall:
-      parenorimm LPAREN exprlist RPAREN		{ ['call', undef, $_[1], $_[3]->[1]] }
+      parenorimm LPAREN exprlist RPAREN		{ ['call', undef, $_[1], $_[3]] }
     ;
 
 extcall:
@@ -159,7 +171,7 @@ extcall:
     ;
 
 list:
-      LISTOPEN exprlist listcdr LISTCLOSE	{ ['list', $_[2]->[1], $_[3]] }
+      LISTOPEN exprlist listcdr LISTCLOSE	{ ['list', $_[2], $_[3]] }
     ;
 
 # This is not a full node.
@@ -169,12 +181,12 @@ listcdr:
     ;
 
 comprehension:
-      LISTOPEN expr COMPREHENSION exprlist LISTCLOSE		{ ['comprehension', $_[2], $_[4]->[1]] }
-    | OPENBINARY binary COMPREHENSION exprlist CLOSEBINARY	{ ['binary-comprehension', $_[2], $_[4]->[1]] }
+      LISTOPEN expr COMPREHENSION exprlist LISTCLOSE		{ ['comprehension', $_[2], $_[4]] }
+    | OPENBINARY binary COMPREHENSION exprlist CLOSEBINARY	{ ['binary-comprehension', $_[2], $_[4]] }
     ;
 
 tuple:
-      TUPLEOPEN exprlist TUPLECLOSE	{ ['tuple', $_[2]->[1]] }
+      TUPLEOPEN exprlist TUPLECLOSE	{ ['tuple', $_[2]] }
     ;
 
 case:
@@ -187,7 +199,7 @@ altlist:
     ;
 
 alt:
-      expr whenlist RARROW stmtlist	{ ['alt', $_[1], $_[2]->[1], $_[4]->[1]] }
+      expr whenlist RARROW stmtlist	{ ['alt', $_[1], $_[2], $_[4]] }
     ;
 
 fun:
@@ -209,11 +221,11 @@ funlocallist:
     ;
 
 funlocalexpr:
-      LPAREN exprlist RPAREN whenlist RARROW stmtlist 		{ [$_[2]->[1], $_[4]->[1], $_[6]->[1]] }
+      LPAREN exprlist RPAREN whenlist RARROW stmtlist 		{ [$_[2], $_[4], $_[6]] }
     ;
 
 newrecord:
-      OPENRECORD ATOM TUPLEOPEN exprlist TUPLECLOSE		{ ['record-new', $_[2], $_[4]->[1]] }
+      OPENRECORD ATOM TUPLEOPEN exprlist TUPLECLOSE		{ ['record-new', $_[2], $_[4]] }
     ;
 
 binary:
@@ -258,11 +270,11 @@ receive:
 # This is not a full node.
 after:
 								{ undef }
-    | KW_AFTER expr RARROW exprlist				{ [$_[2], $_[4]->[1]] }
+    | KW_AFTER expr RARROW exprlist				{ [$_[2], $_[4]] }
     ;
 
 try:
-      KW_TRY exprlist opttryof opttrycatch opttryafter KW_END	{ ['try', $_[2]->[1], $_[3], $_[4], $_[5]] }
+      KW_TRY exprlist opttryof opttrycatch opttryafter KW_END	{ ['try', $_[2], $_[3], $_[4], $_[5]] }
     ;
 
 # These are not full nodes.
@@ -278,7 +290,7 @@ opttrycatch:
 
 opttryafter:
 								{ undef }
-    | KW_AFTER exprlist 					{ $_[2]->[1] }
+    | KW_AFTER exprlist 					{ $_[2] }
     ;
 
 catchaltlist:
@@ -287,9 +299,9 @@ catchaltlist:
     ;
 
 catchalt:
-      ATOM COLON expr whenlist RARROW stmtlist	{ ['catchalt', $_[1], $_[3], $_[4]->[1], $_[6]->[1]] }
-    | VARIABLE COLON expr whenlist RARROW stmtlist	{ ['catchalt', $_[1], $_[3], $_[4]->[1], $_[6]->[1]] }
-    | expr whenlist RARROW stmtlist		{ ['catchalt', undef, $_[1], $_[2]->[1], $_[4]->[1]] }
+      ATOM COLON expr whenlist RARROW stmtlist	{ ['catchalt', $_[1], $_[3], $_[4], $_[6]] }
+    | VARIABLE COLON expr whenlist RARROW stmtlist	{ ['catchalt', $_[1], $_[3], $_[4], $_[6]] }
+    | expr whenlist RARROW stmtlist		{ ['catchalt', undef, $_[1], $_[2], $_[4]] }
     ;
 
 if:
@@ -302,7 +314,7 @@ iflist:
     ;
 
 ifexpr:
-      ifseq RARROW stmtlist	{ [$_[1], $_[3]->[1]] }
+      ifseq RARROW stmtlist	{ [$_[1], $_[3]] }
     ;
 
 ifseq:
