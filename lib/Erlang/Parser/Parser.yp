@@ -4,8 +4,8 @@
 
 %nonassoc KW_CATCH
 %left KW_ANDALSO KW_ORELSE
-%nonassoc EQUALS
-%nonassoc EQUALITY NOT_EQUAL LARROW LDARROW LTE GTE LT GT STRICTLY_EQUAL NOT_QUITE_EQUAL
+%nonassoc MATCH
+%nonassoc EQUAL EXACTLY_NOT_EQUAL LARROW LDARROW LTE GTE LT GT EXACTLY_EQUAL NOT_EQUAL
 %right SEND
 %left KW_OR KW_BOR KW_BXOR
 %left KW_BSL KW_BSR KW_AND KW_BAND
@@ -83,41 +83,41 @@ unparenexpr:
     | comprehension
     | try
     | if
-    | KW_BEGIN exprlist KW_END	{ ['begin', $_[2]] }
-    | expr SEND expr		{ ['send', $_[1], $_[3]] }
-    | expr LT expr		{ ['lt', $_[1], $_[3]] }
-    | expr LTE expr		{ ['lte', $_[1], $_[3]] }
-    | expr GT expr		{ ['gt', $_[1], $_[3]] }
-    | expr GTE expr		{ ['gte', $_[1], $_[3]] }
-    | expr DIVIDE expr		{ ['divide', $_[1], $_[3]] }
-    | expr KW_DIV expr		{ ['div', $_[1], $_[3]] }
-    | expr MULTIPLY expr	{ ['multiply', $_[1], $_[3]] }
-    | expr ADD expr		{ ['add', $_[1], $_[3]] }
-    | expr SUBTRACT expr	{ ['subtract', $_[1], $_[3]] }
-    | expr EQUALS expr		{ ['equals', $_[1], $_[3]] }
-    | expr LISTADD expr		{ ['list-add', $_[1], $_[3]] }
-    | expr LISTSUBTRACT expr	{ ['list-subtract', $_[1], $_[3]] }
-    | expr EQUALITY expr	{ ['equality', $_[1], $_[3]] }
-    | expr STRICTLY_EQUAL expr	{ ['strictly-equal', $_[1], $_[3]] }
-    | expr NOT_EQUAL expr	{ ['not-equal', $_[1], $_[3]] }
-    | expr NOT_QUITE_EQUAL expr	{ ['not-quite_equal', $_[1], $_[3]] }
-    | expr KW_BSL expr		{ ['bsl', $_[1], $_[3]] }
-    | expr KW_BSR expr		{ ['bsr', $_[1], $_[3]] }
-    | expr KW_BOR expr		{ ['bor', $_[1], $_[3]] }
-    | expr KW_BAND expr		{ ['band', $_[1], $_[3]] }
-    | expr KW_BXOR expr		{ ['bxor', $_[1], $_[3]] }
-    | expr KW_REM expr		{ ['rem', $_[1], $_[3]] }
-    | expr KW_ANDALSO expr	{ ['andalso', $_[1], $_[3]] }
-    | expr KW_ORELSE expr	{ ['orelse', $_[1], $_[3]] }
-    | expr KW_AND expr		{ ['and', $_[1], $_[3]] }
-    | expr KW_OR expr		{ ['or', $_[1], $_[3]] }
-    | SUBTRACT expr %prec NEG	{ ['neg', $_[2]] }
-    | KW_NOT expr		{ ['not', $_[2]] }
-    | KW_CATCH expr		{ ['catch-expr', $_[2]] }
+    | KW_BEGIN exprlist KW_END		{ new_node 'Begin', $_[2] }
+    | expr SEND expr			{ new_node 'Send', $_[0], $_[3] }
+    | expr LT expr			{ new_node 'Lt', $_[1], $_[3] }
+    | expr LTE expr			{ new_node 'Lte', $_[1], $_[3] }
+    | expr GT expr			{ new_node 'Gt', $_[1], $_[3] }
+    | expr GTE expr			{ new_node 'Gte', $_[1], $_[3] }
+    | expr DIVIDE expr			{ new_node 'Divide', $_[1], $_[3] }
+    | expr KW_DIV expr			{ new_node 'Div', $_[1], $_[3] }
+    | expr MULTIPLY expr		{ new_node 'Multiply', $_[1], $_[3] }
+    | expr ADD expr			{ new_node 'Add', $_[1], $_[3] }
+    | expr SUBTRACT expr		{ new_node 'Subtract', $_[1], $_[3] }
+    | expr MATCH expr			{ new_node 'Match', $_[1], $_[3] }
+    | expr LISTADD expr			{ new_node 'ListAdd', $_[1], $_[3] }
+    | expr LISTSUBTRACT expr		{ new_node 'ListSubtract', $_[1], $_[3] }
+    | expr EQUAL expr			{ new_node 'Equal', $_[1], $_[3] }
+    | expr EXACTLY_EQUAL expr		{ new_node 'ExactlyEqual', $_[1], $_[3] }
+    | expr EXACTLY_NOT_EQUAL expr	{ new_node 'ExactlyNotEqual', $_[1], $_[3] }
+    | expr NOT_EQUAL expr		{ new_node 'NotEqual', $_[1], $_[3] }
+    | expr KW_BSL expr			{ new_node 'Bsl', $_[1], $_[3] }
+    | expr KW_BSR expr			{ new_node 'Bsr', $_[1], $_[3] }
+    | expr KW_BOR expr			{ new_node 'Bor', $_[1], $_[3] }
+    | expr KW_BAND expr			{ new_node 'Band', $_[1], $_[3] }
+    | expr KW_BXOR expr			{ new_node 'Bxor', $_[1], $_[3] }
+    | expr KW_REM expr			{ new_node 'Rem', $_[1], $_[3] }
+    | expr KW_ANDALSO expr		{ new_node 'AndAlso', $_[1], $_[3] }
+    | expr KW_ORELSE expr		{ new_node 'OrElse', $_[1], $_[3] }
+    | expr KW_AND expr			{ new_node 'And', $_[1], $_[3] }
+    | expr KW_OR expr			{ new_node 'Or', $_[1], $_[3] }
+    | SUBTRACT expr %prec NEG		{ new_node 'Neg', $_[2] }
+    | KW_NOT expr			{ new_node 'Not', $_[2] }
+    | KW_CATCH expr			{ new_node 'CatchExpr', $_[2] }
 
     # TODO: unhack this.
-    | expr LARROW expr		{ ['larrow', $_[1], $_[3]] }
-    | expr LDARROW expr		{ ['ldarrow', $_[1], $_[3]] }
+    | expr LARROW expr		{ new_node 'LArrow', $_[1], $_[3] }
+    | expr LDARROW expr		{ new_node 'LdArrow', $_[1], $_[3] }
 
     | call
     ;
@@ -137,24 +137,24 @@ parenorimm:
     ;
 
 immexpr:
-      ATOM			{ ['atom', $_[1]] }
-    | FLOAT			{ ['float', $_[1]] }
-    | BASE_INTEGER		{ ['base-integer', $_[1]] }
-    | INTEGER			{ ['integer', $_[1]] }
+      ATOM			{ new_node 'Atom', $_[1] }
+    | FLOAT			{ new_node 'Float', $_[1] }
+    | BASE_INTEGER		{ new_node 'BaseInteger', $_[1] }
+    | INTEGER			{ new_node 'Integer', $_[1] }
     | string
-    | VARIABLE OPENRECORD ATOM  { ['variable-record-access', $_[1], $_[3]] }
-    | VARIABLE newrecord	{ ['variable-record-update', $_[1], @{$_[2]}[1..2]] }
-    | VARIABLE			{ ['variable', $_[1]] }
-    | MACRO			{ ['macro', substr($_[1], 1)] }
-    | LITERAL			{ ['literal', substr($_[1], 1)] }
+    | VARIABLE OPENRECORD ATOM  { new_node 'VariableRecordAccess', $_[1], $_[3] }
+    | VARIABLE newrecord	{ new_node 'VariableRecordUpdate', $_[1], @{$_[2]}[1..2] }
+    | VARIABLE			{ new_node 'Variable', $_[1] }
+    | MACRO			{ new_node 'Macro', substr($_[1], 1) }
+    | LITERAL			{ new_node 'Literal', substr($_[1], 1) }
     | list
     | tuple
     | newrecord
     ;
 
 string:
-      STRING			{ ['string', $_[1]] }
-    | string STRING		{ ['string', $_[1]->[1] . $_[2]] }
+      STRING			{ new_node 'String', $_[1] }
+    | string STRING		{ new_node 'String', $_[1]->[1] . $_[2] }
     ;
 
 call:
@@ -163,15 +163,15 @@ call:
     ;
 
 intcall:
-      parenorimm LPAREN exprlist RPAREN		{ ['call', undef, $_[1], $_[3]] }
+      parenorimm LPAREN exprlist RPAREN		{ new_node 'Call', undef, $_[1], $_[3] }
     ;
 
 extcall:
-      parenorimm COLON intcall 			{ ['call', $_[1], $_[3]->[2], $_[3]->[3]] }
+      parenorimm COLON intcall 			{ new_node 'Call', $_[1], $_[3]->[2], $_[3]->[3] }
     ;
 
 list:
-      LISTOPEN exprlist listcdr LISTCLOSE	{ ['list', $_[2], $_[3]] }
+      LISTOPEN exprlist listcdr LISTCLOSE	{ new_node 'List', $_[2], $_[3] }
     ;
 
 # This is not a full node.
@@ -181,37 +181,37 @@ listcdr:
     ;
 
 comprehension:
-      LISTOPEN expr COMPREHENSION exprlist LISTCLOSE		{ ['comprehension', $_[2], $_[4]] }
-    | OPENBINARY binary COMPREHENSION exprlist CLOSEBINARY	{ ['binary-comprehension', $_[2], $_[4]] }
+      LISTOPEN expr COMPREHENSION exprlist LISTCLOSE		{ new_node 'Comprehension', $_[2], $_[4] }
+    | OPENBINARY binary COMPREHENSION exprlist CLOSEBINARY	{ new_node 'BinaryComprehension', $_[2], $_[4] }
     ;
 
 tuple:
-      TUPLEOPEN exprlist TUPLECLOSE	{ ['tuple', $_[2]] }
+      TUPLEOPEN exprlist TUPLECLOSE	{ new_node 'Tuple', $_[2] }
     ;
 
 case:
-      KW_CASE expr KW_OF altlist KW_END	{ ['case', $_[2], $_[4]->[1]] }
+      KW_CASE expr KW_OF altlist KW_END	{ new_node 'Case', $_[2], $_[4] }
     ;
 
 altlist:
-      alt			{ ['altlist', [$_[1]]] }
-    | altlist SEMICOLON alt	{ ['altlist', [@{$_[1]->[1]}, $_[3]]] }
+      alt			{ [$_[1]] }
+    | altlist SEMICOLON alt	{ [@{$_[1]}, $_[3]] }
     ;
 
 alt:
-      expr whenlist RARROW stmtlist	{ ['alt', $_[1], $_[2], $_[4]] }
+      expr whenlist RARROW stmtlist	{ new_node 'Alt', $_[1], $_[2], $_[4] }
     ;
 
 fun:
       funlocal
-    | KW_FUN ATOM COLON ATOM DIVIDE INTEGER				{ ['fun-ext', $_[2], $_[4], $_[6]] }
-    | KW_FUN MACRO COLON ATOM DIVIDE INTEGER				{ ['fun-ext-macro', substr($_[2], 1), $_[4], $_[6]] }
-    | KW_FUN VARIABLE COLON ATOM DIVIDE INTEGER				{ ['fun-ext-var', $_[2], $_[4], $_[6]] }
-    | KW_FUN ATOM DIVIDE INTEGER					{ ['fun-int', $_[2], $_[4]] }
+    | KW_FUN ATOM COLON ATOM DIVIDE INTEGER				{ new_node 'FunExt', $_[2], $_[4], $_[6] }
+    | KW_FUN MACRO COLON ATOM DIVIDE INTEGER				{ new_node 'FunExtMacro', substr($_[2], 1), $_[4], $_[6] }
+    | KW_FUN VARIABLE COLON ATOM DIVIDE INTEGER				{ new_node 'FunExtVar', $_[2], $_[4], $_[6] }
+    | KW_FUN ATOM DIVIDE INTEGER					{ new_node 'FunInt', $_[2], $_[4] }
     ;
 
 funlocal:
-      KW_FUN funlocallist KW_END					{ ['fun-local', $_[2]] }
+      KW_FUN funlocallist KW_END					{ new_node 'FunLocal', $_[2] }
     ;
     
 # These are not full nodes.
@@ -225,11 +225,11 @@ funlocalexpr:
     ;
 
 newrecord:
-      OPENRECORD ATOM TUPLEOPEN exprlist TUPLECLOSE		{ ['record-new', $_[2], $_[4]] }
+      OPENRECORD ATOM TUPLEOPEN exprlist TUPLECLOSE		{ new_node 'RecordNew', $_[2], $_[4] }
     ;
 
 binary:
-      OPENBINARY optbinarylist CLOSEBINARY			{ ['binary', $_[2]] }
+      OPENBINARY optbinarylist CLOSEBINARY			{ new_node 'Binary', $_[2] }
     ;
 
 # These are not full nodes.
@@ -244,7 +244,7 @@ binarylist:
     ;
 
 binaryexpr:
-      parenorimm optbinarysize optbinaryqualifier 		{ ['binaryexpr', $_[1], $_[2], $_[3]] }
+      parenorimm optbinarysize optbinaryqualifier 		{ new_node 'BinaryExpr', $_[1], $_[2], $_[3] }
     ;
 
 # These are not full nodes.
@@ -264,7 +264,7 @@ binaryqualifier:
     ;
 
 receive:
-      KW_RECEIVE altlist after KW_END				{ ['receive', $_[2]->[1], $_[3]] }
+      KW_RECEIVE altlist after KW_END				{ new_node 'Receive', $_[2], $_[3] }
     ;
 
 # This is not a full node.
@@ -274,18 +274,18 @@ after:
     ;
 
 try:
-      KW_TRY exprlist opttryof opttrycatch opttryafter KW_END	{ ['try', $_[2], $_[3], $_[4], $_[5]] }
+      KW_TRY exprlist opttryof opttrycatch opttryafter KW_END	{ new_node 'Try', $_[2], $_[3], $_[4], $_[5] }
     ;
 
 # These are not full nodes.
 opttryof:
 								{ undef }
-    | KW_OF altlist						{ $_[2]->[1] }
+    | KW_OF altlist						{ $_[2] }
     ;
 
 opttrycatch:
 								{ undef }
-    | KW_CATCH catchaltlist					{ $_[2]->[1] }
+    | KW_CATCH catchaltlist					{ $_[2] }
     ;
 
 opttryafter:
@@ -294,18 +294,18 @@ opttryafter:
     ;
 
 catchaltlist:
-      catchalt				{ ['catchaltlist', [$_[1]]] }
-    | catchaltlist SEMICOLON catchalt	{ ['catchaltlist', [@{$_[1]->[1]}, $_[3]]] }
+      catchalt				{ [$_[1]] }
+    | catchaltlist SEMICOLON catchalt	{ [@{$_[1]}, $_[3]] }
     ;
 
 catchalt:
-      ATOM COLON expr whenlist RARROW stmtlist	{ ['catchalt', $_[1], $_[3], $_[4], $_[6]] }
-    | VARIABLE COLON expr whenlist RARROW stmtlist	{ ['catchalt', $_[1], $_[3], $_[4], $_[6]] }
-    | expr whenlist RARROW stmtlist		{ ['catchalt', undef, $_[1], $_[2], $_[4]] }
+      ATOM COLON expr whenlist RARROW stmtlist		{ new_node 'CatchAlt', $_[1], $_[3], $_[4], $_[6] }
+    | VARIABLE COLON expr whenlist RARROW stmtlist	{ new_node 'CatchAlt', $_[1], $_[3], $_[4], $_[6] }
+    | expr whenlist RARROW stmtlist			{ new_node 'CatchAlt', undef, $_[1], $_[2], $_[4] }
     ;
 
 if:
-      KW_IF iflist KW_END			{ ['if', $_[2]] }
+      KW_IF iflist KW_END			{ new_node 'If', $_[2] }
     ;
 
 iflist:
