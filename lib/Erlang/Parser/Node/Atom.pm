@@ -14,7 +14,7 @@ sub print {
 
     if (not $self->atom =~ /^[^a-z]|[^a-zA-Z_0-9]/
 	and not $self->atom =~ /^(case|receive|after|of|end|fun|when|div|bs[lr]|bx?or|band|rem|try|catch|andalso|and|orelse|or|begin|not|if)$/) {
-	print $fh "$self->atom";
+	print $fh $self->atom;
     } else {
 	my $atom = $self->atom;
 	$atom =~ s/\\/\\\\/g;

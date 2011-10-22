@@ -7,14 +7,15 @@ package Erlang::Parser::Node::Directive;
 use Moose;
 with 'Erlang::Parser::Node';
 
-has 'name' => (is => 'rw', required => 1, isa => 'Str');
-has 'args' => (is => 'rw', required => 1, isa => 'ArrayRef[Erlang::Parser::Node]');
+has 'directive' => (is => 'rw', required => 1, isa => 'Str');
+has 'args'      => (is => 'rw', required => 1, isa => 'ArrayRef[Erlang::Parser::Node]');
 
 sub print {
     my ($self, $fh, $depth) = @_;
 
-    print $fh "-", $self->name, "(";
+    print $fh "-", $self->directive, "(";
     my $first = 1;
+
     foreach (@{$self->args}) {
 	if ($first) { $first = 0 } else { print $fh ', ' }
 	$_->print($fh, $depth);

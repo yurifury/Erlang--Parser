@@ -7,7 +7,7 @@ package Erlang::Parser::Node::WhenList;
 use Moose;
 with 'Erlang::Parser::Node';
 
-has 'groups' => (is => 'rw', default => sub {[]}, isa => 'ArrayRef[Erlang::Parser::Node]');
+has 'groups' => (is => 'rw', default => sub {[]});#, isa => 'AraryRef[ArrayRef[Erlang::Parser::Node]]');
 has 'exprs'  => (is => 'rw', default => sub {[]}, isa => 'ArrayRef[Erlang::Parser::Node]');
 
 sub _append {
@@ -18,7 +18,7 @@ sub _append {
 
 sub _group () {
     my $self = shift;
-    push @{$self->groups}, $self->exprs;
+    push @{$self->groups}, $self->exprs if @{$self->exprs};
     $self->exprs([]);
     $self;
 }
@@ -29,9 +29,14 @@ sub print {
     if (@{$self->groups}) {
 	print $fh 'when ';
 	my $first = 1;
-	foreach (@{$self->whens}) {
-	    if ($first) { $first = 0 } else { print $fh ', ' }
-	    $_->print($fh, $depth);
+	foreach (@{$self->groups}) {
+	    if ($first) { $first = 0 } else { print $fh '; ' }
+
+	    my $infirst = 1;
+	    foreach (@$_) {
+		if ($infirst) { $infirst = 0 } else { print $fh ', ' }
+		$_->print($fh, $depth);
+	    }
 	}
 	print $fh ' ';
     }

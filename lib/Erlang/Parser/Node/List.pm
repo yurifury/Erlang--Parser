@@ -7,7 +7,8 @@ package Erlang::Parser::Node::List;
 use Moose;
 with 'Erlang::Parser::Node';
 
-has 'elems' => (is => 'rw', default => sub {[]}, isa => 'ArrayRef[Erlang::Parser::Node]');
+has 'elems' => (is => 'rw', required => 1, isa => 'ArrayRef[Erlang::Parser::Node]');
+has 'cdr'   => (is => 'rw', required => 1, isa => 'Maybe[Erlang::Parser::Node]');
 
 sub print {
     my ($self, $fh, $depth) = @_;
@@ -18,6 +19,12 @@ sub print {
 	if ($first) { $first = 0 } else { print $fh ', ' }
 	$_->print($fh, $depth);
     }
+
+    if (defined $self->cdr) {
+	print $fh '|';
+	$self->cdr->print($fh, $depth);
+    }
+
     print $fh ']';
 }
 

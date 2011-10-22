@@ -27,6 +27,7 @@
     use Erlang::Parser::Node::Integer;
     use Erlang::Parser::Node::BinOp;
     use Erlang::Parser::Node::List;
+    use Erlang::Parser::Node::Variable;
 
     sub new_node {
 	my ($kind, %args) = @_;
@@ -45,7 +46,7 @@ root:
     ;
 
 rootstmt:
-      SUBTRACT ATOM LPAREN exprlist RPAREN PERIOD	{ new_node 'Directive', name => $_[2], args => $_[4] }
+      SUBTRACT ATOM LPAREN exprlist RPAREN PERIOD	{ new_node 'Directive', directive => $_[2], args => $_[4] }
     | deflist PERIOD					{ $_[1] }
     ;
 
@@ -55,7 +56,7 @@ deflist:
     ;
 
 def:
-      ATOM LPAREN exprlist RPAREN whenlist RARROW stmtlist	{ new_node 'Def', name => $_[1], args => $_[3], whens => $_[5]->group, stmts => $_[7] }
+      ATOM LPAREN exprlist RPAREN whenlist RARROW stmtlist	{ new_node 'Def', def => $_[1], args => $_[3], whens => $_[5]->_group, stmts => $_[7] }
     ;
 
 whenlist:
@@ -86,7 +87,7 @@ unparenexpr:
     | comprehension
     | try
     | if
-    | KW_BEGIN exprlist KW_END		{ new_node 'Begin', $_[2] }
+    | KW_BEGIN exprlist KW_END		{ new_node 'Begin', exprs => $_[2] }
     | expr SEND expr			{ new_node 'BinOp', op => '!',       a => $_[0], b => $_[3] }
     | expr LT expr			{ new_node 'BinOp', op => '<',       a => $_[1], b => $_[3] }
     | expr LTE expr			{ new_node 'BinOp', op => '=<',      a => $_[1], b => $_[3] }
@@ -114,9 +115,9 @@ unparenexpr:
     | expr KW_ORELSE expr		{ new_node 'BinOp', op => 'orelse',  a => $_[1], b => $_[3] }
     | expr KW_AND expr			{ new_node 'BinOp', op => 'and',     a => $_[1], b => $_[3] }
     | expr KW_OR expr			{ new_node 'BinOp', op => 'or',      a => $_[1], b => $_[3] }
-    | SUBTRACT expr %prec NEG		{ new_node 'Neg', $_[2] }
-    | KW_NOT expr			{ new_node 'Not', $_[2] }
-    | KW_CATCH expr			{ new_node 'CatchExpr', $_[2] }
+    | SUBTRACT expr %prec NEG		{ new_node 'UnOp',  op => '-',       a => $_[2] }
+    | KW_NOT expr			{ new_node 'UnOp',  op => 'not',     a => $_[2] }
+    | KW_CATCH expr			{ new_node 'UnOp',  op => 'catch',   a => $_[2] }
 
     # TODO: unhack this.
     | expr LARROW expr		{ new_node 'BinOp', op => '<-', a => $_[1], b => $_[3] }
@@ -141,15 +142,15 @@ parenorimm:
 
 immexpr:
       ATOM			{ new_node 'Atom', atom => $_[1] }
-    | FLOAT			{ new_node 'Float', $_[1] }
-    | BASE_INTEGER		{ new_node 'BaseInteger', $_[1] }
+    | FLOAT			{ new_node 'Float', float => $_[1] }
+    | BASE_INTEGER		{ new_node 'BaseInteger', baseinteger => $_[1] }
     | INTEGER			{ new_node 'Integer', int => $_[1] }
     | string
     | VARIABLE OPENRECORD ATOM  { new_node 'VariableRecordAccess', $_[1], $_[3] }
     | VARIABLE newrecord	{ new_node 'VariableRecordUpdate', $_[1], @{$_[2]}[1..2] }
-    | VARIABLE			{ new_node 'Variable', $_[1] }
-    | MACRO			{ new_node 'Macro', substr($_[1], 1) }
-    | LITERAL			{ new_node 'Literal', substr($_[1], 1) }
+    | VARIABLE			{ new_node 'Variable', variable => $_[1] }
+    | MACRO			{ new_node 'Macro', macro => substr($_[1], 1) }
+    | LITERAL			{ new_node 'Literal', literal => substr($_[1], 1) }
     | list
     | tuple
     | newrecord
@@ -174,7 +175,7 @@ extcall:
     ;
 
 list:
-      LISTOPEN exprlist listcdr LISTCLOSE	{ new_node 'List', $_[2], $_[3] }
+      LISTOPEN exprlist listcdr LISTCLOSE	{ new_node 'List', elems => $_[2], cdr => $_[3] }
     ;
 
 # This is not a full node.

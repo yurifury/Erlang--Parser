@@ -7,7 +7,7 @@ package Erlang::Parser::Node::Def;
 use Moose;
 with 'Erlang::Parser::Node';
 
-has 'name'  => (is => 'rw', required => 1, isa => 'Str');
+has 'def'   => (is => 'rw', required => 1, isa => 'Str');
 has 'args'  => (is => 'rw', required => 1, isa => 'ArrayRef[Erlang::Parser::Node]');
 has 'whens' => (is => 'rw', required => 1, isa => 'Erlang::Parser::Node::WhenList');
 has 'stmts' => (is => 'rw', required => 1, isa => 'ArrayRef[Erlang::Parser::Node]');
@@ -15,7 +15,7 @@ has 'stmts' => (is => 'rw', required => 1, isa => 'ArrayRef[Erlang::Parser::Node
 sub print {
     my ($self, $fh, $depth) = @_;
 
-    print $fh "$self->name(";
+    print $fh $self->def, '(';
 
     my $first = 1;
     foreach (@{$self->args}) {

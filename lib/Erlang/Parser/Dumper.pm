@@ -54,8 +54,6 @@ sub print_node {
 	$string =~ s/"/\\"/g;
 
 	print $fh "\"$string\"";
-    } elsif ($kind eq 'variable') {
-	print $fh $_[0];
     } elsif ($kind eq 'macro') {
 	print $fh "?$_[0]";
     } elsif ($kind eq 'tuple') {
