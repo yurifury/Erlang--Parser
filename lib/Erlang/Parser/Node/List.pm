@@ -4,39 +4,24 @@
 
 package Erlang::Parser::Node::List;
 
-use strict;
-use warnings;
+use Moose;
+with 'Erlang::Parser::Node';
 
-use Erlang::Parser::Node;
-our @ISA = ('Erlang::Parser::Node');
-
-our $KIND = 'List';
-
-sub new {
-    my ($class, $elems) = @_;
-    my $self = $class->SUPER::new($KIND);
-
-    $self->{ELEMS} = [map { $_->copy } @$elems];
-
-    bless $self, $class;
-}
-
-sub copy {
-    my $self = shift;
-    Erlang::Parser::Node::List->new($self->{ELEMS});
-}
+has 'elems' => (is => 'rw', default => sub {[]}, isa => 'ArrayRef[Erlang::Parser::Node]');
 
 sub print {
-    my ($self, $fh) = @_;
+    my ($self, $fh, $depth) = @_;
 
     print $fh '[';
     my $first = 1;
-    foreach (@{$self->{ELEMS}}) {
+    foreach (@{$self->elems}) {
 	if ($first) { $first = 0 } else { print $fh ', ' }
-	$_->print($fh);
+	$_->print($fh, $depth);
     }
     print $fh ']';
 }
+
+__PACKAGE__->meta->make_immutable;
 
 1;
 

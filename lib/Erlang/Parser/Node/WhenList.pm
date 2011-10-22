@@ -4,36 +4,40 @@
 
 package Erlang::Parser::Node::WhenList;
 
-use strict;
-use warnings;
+use Moose;
+with 'Erlang::Parser::Node';
 
-use Erlang::Parser::Node;
-our @ISA = ('Erlang::Parser::Node');
-
-our $KIND = 'WhenList';
-
-sub new {
-    my ($class) = @_;
-    my $self = $class->SUPER::new($KIND);
-
-    $self->{GROUPS} = [];
-    $self->{EXPRS} = [];
-
-    bless $self, $class;
-}
+has 'groups' => (is => 'rw', default => sub {[]}, isa => 'ArrayRef[Erlang::Parser::Node]');
+has 'exprs'  => (is => 'rw', default => sub {[]}, isa => 'ArrayRef[Erlang::Parser::Node]');
 
 sub _append {
     my ($self, $expr) = @_;
-    $self->{EXPRS} = [@{$self->{EXPRS}}, $expr->copy];
+    push @{$self->exprs}, $expr;
     $self;
 }
 
 sub _group () {
     my $self = shift;
-    $self->{GROUPS} = [@{$self->{GROUPS}}, $self->{EXPRS}];
-    $self->{EXPRS} = [];
+    push @{$self->groups}, $self->exprs;
+    $self->exprs([]);
     $self;
 }
+
+sub print {
+    my ($self, $fh, $depth) = @_;
+
+    if (@{$self->groups}) {
+	print $fh 'when ';
+	my $first = 1;
+	foreach (@{$self->whens}) {
+	    if ($first) { $first = 0 } else { print $fh ', ' }
+	    $_->print($fh, $depth);
+	}
+	print $fh ' ';
+    }
+}
+
+__PACKAGE__->meta->make_immutable;
 
 1;
 

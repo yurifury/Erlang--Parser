@@ -30,45 +30,6 @@ sub print_node {
 	print $fh '-';
 	$class->print_node($fh, @{$_[0]});
 	print $fh ')';
-    } elsif ($kind eq 'deflist') {
-	my $first = 1;
-	foreach (@{$_[0]}) {
-	    if ($first) { $first = 0 } else { print $fh ";\n", "\t" x $depth }
-	    $class->print_node($fh, @$_);
-	}
-	print $fh ".\n";
-    } elsif ($kind eq 'def') {
-	my ($name, $args, $whens, $stmts) = @_;
-	print $fh "$name(";
-    
-	my $first = 1;
-	foreach (@$args) {
-	    if ($first) { $first = 0 } else { print $fh ', ' }
-	    $class->print_node($fh, @$_);
-	}
-	
-	$depth++;
-
-	print $fh ") ";
-
-	if (@$whens) {
-	    print $fh 'when ';
-	    $first = 1;
-	    foreach (@$whens) {
-		if ($first) { $first = 0 } else { print $fh ', ' }
-		$class->print_node($fh, @$_);
-	    }
-	    print $fh ' ';
-	}
-	
-	print $fh "->\n", "\t" x $depth;
-	$first = 1;
-	foreach (@$stmts) {
-	    if ($first) { $first = 0 } else { print $fh ",\n", "\t" x $depth }
-	    $class->print_node($fh, @$_);
-	}
-
-	$depth--;
     } elsif ($kind eq 'call') {
 	my ($mod, $fun, $args) = @_;
 

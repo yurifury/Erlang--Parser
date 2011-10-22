@@ -4,39 +4,24 @@
 
 package Erlang::Parser::Node::BinOp;
 
-use strict;
-use warnings;
+use Moose;
+with 'Erlang::Parser::Node';
 
-use Erlang::Parser::Node;
-our @ISA = ('Erlang::Parser::Node');
-
-our $KIND = 'BinOp';
-
-sub new {
-    my ($class, $op, $a, $b) = @_;
-    my $self = $class->SUPER::new($KIND);
-
-    $self->{OP} = $op;
-    $self->{A} = $a;
-    $self->{B} = $b;
-
-    bless $self, $class;
-}
-
-sub copy {
-    my $self = shift;
-    Erlang::Parser::Node::BinOp->new($self->{OP}, $self->{A}, $self->{B});
-}
+has 'op' => (is => 'rw', required => 1, isa => 'Str');
+has 'a'  => (is => 'rw', required => 1, does => 'Erlang::Parser::Node');
+has 'b'  => (is => 'rw', required => 1, does => 'Erlang::Parser::Node');
 
 sub print {
-    my ($self, $fh) = @_;
+    my ($self, $fh, $depth) = @_;
 
     print $fh '(';
-    $self->{A}->print($fh);
-    print $fh $self->{OP};
-    $self->{B}->print($fh);
+    $self->a->print($fh, $depth);
+    print $fh $self->op;
+    $self->b->print($fh, $depth);
     print $fh ')';
 }
+
+__PACKAGE__->meta->make_immutable;
 
 1;
 

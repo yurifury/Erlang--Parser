@@ -4,24 +4,11 @@
 
 package Erlang::Parser::Node;
 
-use strict;
-use warnings;
+use Moose::Role;
+use MooseX::Clone;
 
-use Erlang::Parser::Node::Directive;
-
-sub new {
-    my ($class, $kind) = @_;
-    my $self = {KIND => $kind};
-    bless $self, $class;
-}
-
-sub copy {
-    die "copy called on an Erlang::Parser::Node::$_[0]->{KIND} w/o impl";
-}
-
-sub print {
-    die "print called on an Erlang::Parser::Node::$_[0]->{KIND} w/o impl";
-}
+with 'MooseX::Clone';
+requires qw/print/;
 
 1;
 

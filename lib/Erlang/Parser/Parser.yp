@@ -16,6 +16,9 @@
 %right LISTADD LISTSUBTRACT
 
 %{
+    use strict;
+    use warnings;
+
     use Erlang::Parser::Node::Directive;
     use Erlang::Parser::Node::DefList;
     use Erlang::Parser::Node::Def;
@@ -26,12 +29,8 @@
     use Erlang::Parser::Node::List;
 
     sub new_node {
-	my ($kind, @args) = @_;
-	do {
-	    no strict 'refs';
-	    my $class = "Erlang::Parser::Node::$kind";
-	    &{"${class}::new"}($class, @args)
-	}
+	my ($kind, %args) = @_;
+	"Erlang::Parser::Node::$kind"->new(%args);
     }
 %}
 
@@ -46,7 +45,7 @@ root:
     ;
 
 rootstmt:
-      SUBTRACT ATOM LPAREN exprlist RPAREN PERIOD	{ new_node 'Directive', $_[2], $_[4] }
+      SUBTRACT ATOM LPAREN exprlist RPAREN PERIOD	{ new_node 'Directive', name => $_[2], args => $_[4] }
     | deflist PERIOD					{ $_[1] }
     ;
 
@@ -56,12 +55,12 @@ deflist:
     ;
 
 def:
-      ATOM LPAREN exprlist RPAREN whenlist RARROW stmtlist	{ new_node 'Def', $_[1], $_[3], $_[5]->group, $_[7] }
+      ATOM LPAREN exprlist RPAREN whenlist RARROW stmtlist	{ new_node 'Def', name => $_[1], args => $_[3], whens => $_[5]->group, stmts => $_[7] }
     ;
 
 whenlist:
 				{ new_node 'WhenList' }
-    | KW_WHEN expr		{ new_node('WhenList')->append($_[2]) }
+    | KW_WHEN expr		{ new_node('WhenList')->_append($_[2]) }
     # TODO differentiate these. (a;b,c (A)||(B&&C))
     | whenlist COMMA expr	{ $_[1]->_append($_[3]) }
     | whenlist SEMICOLON expr	{ $_[1]->_group->_append($_[3]) }
@@ -88,40 +87,40 @@ unparenexpr:
     | try
     | if
     | KW_BEGIN exprlist KW_END		{ new_node 'Begin', $_[2] }
-    | expr SEND expr			{ new_node 'BinOp', '!',       $_[0], $_[3] }
-    | expr LT expr			{ new_node 'BinOp', '<',       $_[1], $_[3] }
-    | expr LTE expr			{ new_node 'BinOp', '=<',      $_[1], $_[3] }
-    | expr GT expr			{ new_node 'BinOp', '>',       $_[1], $_[3] }
-    | expr GTE expr			{ new_node 'BinOp', '>=',      $_[1], $_[3] }
-    | expr DIVIDE expr			{ new_node 'BinOp', '/',       $_[1], $_[3] }
-    | expr KW_DIV expr			{ new_node 'BinOp', 'div',     $_[1], $_[3] }
-    | expr MULTIPLY expr		{ new_node 'BinOp', '*',       $_[1], $_[3] }
-    | expr ADD expr			{ new_node 'BinOp', '+',       $_[1], $_[3] }
-    | expr SUBTRACT expr		{ new_node 'BinOp', '-',       $_[1], $_[3] }
-    | expr MATCH expr			{ new_node 'BinOp', '=',       $_[1], $_[3] }
-    | expr LISTADD expr			{ new_node 'BinOp', '++',      $_[1], $_[3] }
-    | expr LISTSUBTRACT expr		{ new_node 'BinOp', '--',      $_[1], $_[3] }
-    | expr EQUAL expr			{ new_node 'BinOp', '==',      $_[1], $_[3] }
-    | expr EXACTLY_EQUAL expr		{ new_node 'BinOp', '=:=',     $_[1], $_[3] }
-    | expr EXACTLY_NOT_EQUAL expr	{ new_node 'BinOp', '=/=',     $_[1], $_[3] }
-    | expr NOT_EQUAL expr		{ new_node 'BinOp', '/=',      $_[1], $_[3] }
-    | expr KW_BSL expr			{ new_node 'BinOp', 'bsl',     $_[1], $_[3] }
-    | expr KW_BSR expr			{ new_node 'BinOp', 'bsr',     $_[1], $_[3] }
-    | expr KW_BOR expr			{ new_node 'BinOp', 'bor',     $_[1], $_[3] }
-    | expr KW_BAND expr			{ new_node 'BinOp', 'band',    $_[1], $_[3] }
-    | expr KW_BXOR expr			{ new_node 'BinOp', 'bxor',    $_[1], $_[3] }
-    | expr KW_REM expr			{ new_node 'BinOp', 'rem',     $_[1], $_[3] }
-    | expr KW_ANDALSO expr		{ new_node 'BinOp', 'andalso', $_[1], $_[3] }
-    | expr KW_ORELSE expr		{ new_node 'BinOp', 'orelse',  $_[1], $_[3] }
-    | expr KW_AND expr			{ new_node 'BinOp', 'and',     $_[1], $_[3] }
-    | expr KW_OR expr			{ new_node 'BinOp', 'or',      $_[1], $_[3] }
+    | expr SEND expr			{ new_node 'BinOp', op => '!',       a => $_[0], b => $_[3] }
+    | expr LT expr			{ new_node 'BinOp', op => '<',       a => $_[1], b => $_[3] }
+    | expr LTE expr			{ new_node 'BinOp', op => '=<',      a => $_[1], b => $_[3] }
+    | expr GT expr			{ new_node 'BinOp', op => '>',       a => $_[1], b => $_[3] }
+    | expr GTE expr			{ new_node 'BinOp', op => '>=',      a => $_[1], b => $_[3] }
+    | expr DIVIDE expr			{ new_node 'BinOp', op => '/',       a => $_[1], b => $_[3] }
+    | expr KW_DIV expr			{ new_node 'BinOp', op => 'div',     a => $_[1], b => $_[3] }
+    | expr MULTIPLY expr		{ new_node 'BinOp', op => '*',       a => $_[1], b => $_[3] }
+    | expr ADD expr			{ new_node 'BinOp', op => '+',       a => $_[1], b => $_[3] }
+    | expr SUBTRACT expr		{ new_node 'BinOp', op => '-',       a => $_[1], b => $_[3] }
+    | expr MATCH expr			{ new_node 'BinOp', op => '=',       a => $_[1], b => $_[3] }
+    | expr LISTADD expr			{ new_node 'BinOp', op => '++',      a => $_[1], b => $_[3] }
+    | expr LISTSUBTRACT expr		{ new_node 'BinOp', op => '--',      a => $_[1], b => $_[3] }
+    | expr EQUAL expr			{ new_node 'BinOp', op => '==',      a => $_[1], b => $_[3] }
+    | expr EXACTLY_EQUAL expr		{ new_node 'BinOp', op => '=:=',     a => $_[1], b => $_[3] }
+    | expr EXACTLY_NOT_EQUAL expr	{ new_node 'BinOp', op => '=/=',     a => $_[1], b => $_[3] }
+    | expr NOT_EQUAL expr		{ new_node 'BinOp', op => '/=',      a => $_[1], b => $_[3] }
+    | expr KW_BSL expr			{ new_node 'BinOp', op => 'bsl',     a => $_[1], b => $_[3] }
+    | expr KW_BSR expr			{ new_node 'BinOp', op => 'bsr',     a => $_[1], b => $_[3] }
+    | expr KW_BOR expr			{ new_node 'BinOp', op => 'bor',     a => $_[1], b => $_[3] }
+    | expr KW_BAND expr			{ new_node 'BinOp', op => 'band',    a => $_[1], b => $_[3] }
+    | expr KW_BXOR expr			{ new_node 'BinOp', op => 'bxor',    a => $_[1], b => $_[3] }
+    | expr KW_REM expr			{ new_node 'BinOp', op => 'rem',     a => $_[1], b => $_[3] }
+    | expr KW_ANDALSO expr		{ new_node 'BinOp', op => 'andalso', a => $_[1], b => $_[3] }
+    | expr KW_ORELSE expr		{ new_node 'BinOp', op => 'orelse',  a => $_[1], b => $_[3] }
+    | expr KW_AND expr			{ new_node 'BinOp', op => 'and',     a => $_[1], b => $_[3] }
+    | expr KW_OR expr			{ new_node 'BinOp', op => 'or',      a => $_[1], b => $_[3] }
     | SUBTRACT expr %prec NEG		{ new_node 'Neg', $_[2] }
     | KW_NOT expr			{ new_node 'Not', $_[2] }
     | KW_CATCH expr			{ new_node 'CatchExpr', $_[2] }
 
     # TODO: unhack this.
-    | expr LARROW expr		{ new_node 'BinOp', '<-', $_[1], $_[3] }
-    | expr LDARROW expr		{ new_node 'BinOp', '<=', $_[1], $_[3] }
+    | expr LARROW expr		{ new_node 'BinOp', op => '<-', a => $_[1], b => $_[3] }
+    | expr LDARROW expr		{ new_node 'BinOp', op => '<=', a => $_[1], b => $_[3] }
 
     | call
     ;
@@ -141,10 +140,10 @@ parenorimm:
     ;
 
 immexpr:
-      ATOM			{ new_node 'Atom', $_[1] }
+      ATOM			{ new_node 'Atom', atom => $_[1] }
     | FLOAT			{ new_node 'Float', $_[1] }
     | BASE_INTEGER		{ new_node 'BaseInteger', $_[1] }
-    | INTEGER			{ new_node 'Integer', $_[1] }
+    | INTEGER			{ new_node 'Integer', int => $_[1] }
     | string
     | VARIABLE OPENRECORD ATOM  { new_node 'VariableRecordAccess', $_[1], $_[3] }
     | VARIABLE newrecord	{ new_node 'VariableRecordUpdate', $_[1], @{$_[2]}[1..2] }

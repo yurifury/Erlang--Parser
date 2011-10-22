@@ -4,28 +4,29 @@
 
 package Erlang::Parser::Node::DefList;
 
-use strict;
-use warnings;
+use Moose;
+with 'Erlang::Parser::Node';
 
-use Erlang::Parser::Node;
-our @ISA = ('Erlang::Parser::Node');
-
-our $KIND = 'DefList';
-
-sub new {
-    my $class = shift;
-    my $self = $class->SUPER::new($KIND);
-
-    $self->{DEFS} = [];
-
-    bless $self, $class;
-}
+has 'defs' => (is => 'rw', default => sub {[]}, isa => 'ArrayRef[Erlang::Parser::Node]');
 
 sub _append {
     my ($self, $expr) = @_;
-    $self->{DEFS} = [@{$self->{DEFS}}, $expr->copy];
+    push @{$self->defs}, $expr;
     $self;
 }
+
+sub print {
+    my ($self, $fh, $depth) = @_;
+
+    my $first = 1;
+    foreach (@{$self->defs}) {
+	if ($first) { $first = 0 } else { print $fh ";\n", "\t" x $depth }
+	$_->print($fh, $depth);
+    }
+    print $fh ".\n";
+}
+
+__PACKAGE__->meta->make_immutable;
 
 1;
 

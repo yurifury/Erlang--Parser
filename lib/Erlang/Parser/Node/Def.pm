@@ -4,25 +4,42 @@
 
 package Erlang::Parser::Node::Def;
 
-use strict;
-use warnings;
+use Moose;
+with 'Erlang::Parser::Node';
 
-use Erlang::Parser::Node;
-our @ISA = ('Erlang::Parser::Node');
+has 'name'  => (is => 'rw', required => 1, isa => 'Str');
+has 'args'  => (is => 'rw', required => 1, isa => 'ArrayRef[Erlang::Parser::Node]');
+has 'whens' => (is => 'rw', required => 1, isa => 'Erlang::Parser::Node::WhenList');
+has 'stmts' => (is => 'rw', required => 1, isa => 'ArrayRef[Erlang::Parser::Node]');
 
-our $KIND = 'Def';
+sub print {
+    my ($self, $fh, $depth) = @_;
 
-sub new {
-    my ($class, $name, $args, $whens, $stmts) = @_;
-    my $self = $class->SUPER::new($KIND);
+    print $fh "$self->name(";
 
-    $self->{NAME} = $name;
-    $self->{ARGS} = [map { $_->copy } @$args];
-    $self->{WHENS} = [map { $_->copy } @$whens];
-    $self->{STMTS} = [map { $_->copy } @$stmts];
+    my $first = 1;
+    foreach (@{$self->args}) {
+	if ($first) { $first = 0 } else { print $fh ', ' }
+	$_->print($fh, $depth);
+    }
+    
+    $depth++;
 
-    bless $self, $class;
+    print $fh ") ";
+
+    $self->whens->print($fh, $depth);
+    
+    print $fh "->\n", "\t" x $depth;
+    $first = 1;
+    foreach (@{$self->stmts}) {
+	if ($first) { $first = 0 } else { print $fh ",\n", "\t" x $depth }
+	$_->print($fh, $depth);
+    }
+
+    $depth--;
 }
+
+__PACKAGE__->meta->make_immutable;
 
 1;
 

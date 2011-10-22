@@ -4,32 +4,18 @@
 
 package Erlang::Parser::Node::Integer;
 
-use strict;
-use warnings;
+use Moose;
+with 'Erlang::Parser::Node';
 
-use Erlang::Parser::Node;
-our @ISA = ('Erlang::Parser::Node');
-
-our $KIND = 'Integer';
-
-sub new {
-    my ($class, $int) = @_;
-    my $self = $class->SUPER::new($KIND);
-
-    $self->{INT} = $int;
-
-    bless $self, $class;
-}
-
-sub int {
-    $_[0]->{INT};
-}
+has 'int' => (is => 'rw', required => 1, isa => 'Int');
 
 sub print {
-    my ($self, $fh) = @_;
+    my ($self, $fh, $depth) = @_;
 
-    print $self->{INT};
+    print $self->int;
 }
+
+__PACKAGE__->meta->make_immutable;
 
 1;
 

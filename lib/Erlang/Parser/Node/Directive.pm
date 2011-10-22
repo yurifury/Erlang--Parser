@@ -4,35 +4,25 @@
 
 package Erlang::Parser::Node::Directive;
 
-use strict;
-use warnings;
+use Moose;
+with 'Erlang::Parser::Node';
 
-use Erlang::Parser::Node;
-our @ISA = ('Erlang::Parser::Node');
-
-our $KIND = 'Directive';
-
-sub new {
-    my ($class, $name, $args) = @_;
-    my $self = $class->SUPER::new($KIND);
-
-    $self->{NAME} = $name;
-    $self->{ARGS} = [map { $_->copy } @$args];
-
-    bless $self, $class;
-}
+has 'name' => (is => 'rw', required => 1, isa => 'Str');
+has 'args' => (is => 'rw', required => 1, isa => 'ArrayRef[Erlang::Parser::Node]');
 
 sub print {
-    my ($self, $fh) = @_;
+    my ($self, $fh, $depth) = @_;
 
-    print $fh "-$self->{NAME}(";
+    print $fh "-", $self->name, "(";
     my $first = 1;
-    foreach (@{$self->{ARGS}}) {
+    foreach (@{$self->args}) {
 	if ($first) { $first = 0 } else { print $fh ', ' }
-	$_->print($fh);
+	$_->print($fh, $depth);
     }
     print $fh ").\n";
 }
+
+__PACKAGE__->meta->make_immutable;
 
 1;
 
