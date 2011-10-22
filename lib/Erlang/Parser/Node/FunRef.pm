@@ -7,7 +7,7 @@ package Erlang::Parser::Node::FunRef;
 use Moose;
 with 'Erlang::Parser::Node';
 
-has 'module'   => (is => 'rw', required => 0, isa => 'Maybe[Erlang::Parser::Module]');
+has 'module'   => (is => 'rw', required => 0, isa => 'Maybe[Erlang::Parser::Node]');
 has 'function' => (is => 'rw', required => 1, isa => 'Str');
 has 'arity'    => (is => 'rw', required => 1, isa => 'Int');
 

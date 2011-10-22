@@ -2,27 +2,16 @@
 # This is free software; you can redistribute it and/or modify it under the
 # same terms as Perl itself.
 
-package Erlang::Parser::Node::String;
+package Erlang::Parser::Node::Float;
 
 use Moose;
 with 'Erlang::Parser::Node';
 
-has 'string' => (is => 'rw', required => 1, isa => 'Str');
+has 'float' => (is => 'rw', required => 1, isa => 'Num');
 
 sub print {
     my ($self, $fh, $depth) = @_;
-
-    my $string = $self->string;
-    $string =~ s/\\/\\\\/g;
-    $string =~ s/"/\\"/g;
-
-    print $fh "\"$string\"";
-}
-
-sub _append {
-    my ($self, $str) = @_;
-    $self->string($self->string . $str);
-    $self;
+    print $self->float;
 }
 
 __PACKAGE__->meta->make_immutable;

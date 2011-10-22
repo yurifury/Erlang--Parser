@@ -35,9 +35,22 @@
     use Erlang::Parser::Node::Alt;
     use Erlang::Parser::Node::Try;
     use Erlang::Parser::Node::Literal;
+    use Erlang::Parser::Node::FunRef;
     use Erlang::Parser::Node::FunLocal;
     use Erlang::Parser::Node::FunLocalCase;
     use Erlang::Parser::Node::Case;
+    use Erlang::Parser::Node::RecordNew;
+    use Erlang::Parser::Node::VariableRecordAccess;
+    use Erlang::Parser::Node::VariableRecordUpdate;
+    use Erlang::Parser::Node::Float;
+    use Erlang::Parser::Node::BaseInteger;
+    use Erlang::Parser::Node::BinaryExpr;
+    use Erlang::Parser::Node::Binary;
+    use Erlang::Parser::Node::UnOp;
+    use Erlang::Parser::Node::Begin;
+    use Erlang::Parser::Node::Comprehension;
+    use Erlang::Parser::Node::If;
+    use Erlang::Parser::Node::IfExpr;
 
     sub new_node {
 	my ($kind, %args) = @_;
@@ -155,8 +168,8 @@ immexpr:
     | BASE_INTEGER		{ new_node 'BaseInteger', baseinteger => $_[1] }
     | INTEGER			{ new_node 'Integer', int => $_[1] }
     | string
-    | VARIABLE OPENRECORD ATOM  { new_node 'VariableRecordAccess', $_[1], $_[3] }
-    | VARIABLE newrecord	{ new_node 'VariableRecordUpdate', $_[1], @{$_[2]}[1..2] }
+    | variable OPENRECORD atom  { new_node 'VariableRecordAccess', variable => $_[1], record => $_[3] }
+    | variable newrecord	{ new_node 'VariableRecordUpdate', variable => $_[1], update => $_[2] }
     | LITERAL			{ new_node 'Literal', literal => substr($_[1], 1) }
     | list
     | tuple
@@ -208,7 +221,7 @@ listcdr:
 
 comprehension:
       LISTOPEN expr COMPREHENSION exprlist LISTCLOSE		{ new_node 'Comprehension', output => $_[2], generators => $_[4] }
-    | OPENBINARY binary COMPREHENSION exprlist CLOSEBINARY	{ new_node 'BinaryComprehension', output => $_[2], generators => $_[4] }
+    | OPENBINARY binary COMPREHENSION exprlist CLOSEBINARY	{ new_node 'Comprehension', output => $_[2], generators => $_[4], binary => 1 }
     ;
 
 tuple:
@@ -251,11 +264,11 @@ funlocalcase:
     ;
 
 newrecord:
-      OPENRECORD ATOM TUPLEOPEN exprlist TUPLECLOSE		{ new_node 'RecordNew', $_[2], $_[4] }
+      OPENRECORD atom TUPLEOPEN exprlist TUPLECLOSE		{ new_node 'RecordNew', record => $_[2], exprs => $_[4] }
     ;
 
 binary:
-      OPENBINARY optbinarylist CLOSEBINARY			{ new_node 'Binary', $_[2] }
+      OPENBINARY optbinarylist CLOSEBINARY			{ new_node 'Binary', bexprs => $_[2] }
     ;
 
 # These are not full nodes.
@@ -270,7 +283,7 @@ binarylist:
     ;
 
 binaryexpr:
-      parenorimm optbinarysize optbinaryqualifier 		{ new_node 'BinaryExpr', $_[1], $_[2], $_[3] }
+      parenorimm optbinarysize optbinaryqualifier 		{ new_node 'BinaryExpr', output => $_[1], size => $_[2], qualifier => $_[3] }
     ;
 
 # These are not full nodes.
@@ -331,7 +344,7 @@ catchalt:
     ;
 
 if:
-      KW_IF iflist KW_END			{ new_node 'If', $_[2] }
+      KW_IF iflist KW_END			{ new_node 'If', cases => $_[2] }
     ;
 
 iflist:
@@ -340,7 +353,7 @@ iflist:
     ;
 
 ifexpr:
-      ifseq RARROW stmtlist	{ [$_[1], $_[3]] }
+      ifseq RARROW stmtlist	{ new_node 'IfExpr', seq => $_[1], stmts => $_[3] }
     ;
 
 ifseq:

@@ -11,7 +11,6 @@ has 'int' => (is => 'rw', required => 1, isa => 'Int');
 
 sub print {
     my ($self, $fh, $depth) = @_;
-
     print $self->int;
 }
 
