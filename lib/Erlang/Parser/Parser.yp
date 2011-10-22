@@ -28,6 +28,16 @@
     use Erlang::Parser::Node::BinOp;
     use Erlang::Parser::Node::List;
     use Erlang::Parser::Node::Variable;
+    use Erlang::Parser::Node::Tuple;
+    use Erlang::Parser::Node::Macro;
+    use Erlang::Parser::Node::String;
+    use Erlang::Parser::Node::Call;
+    use Erlang::Parser::Node::Alt;
+    use Erlang::Parser::Node::Try;
+    use Erlang::Parser::Node::Literal;
+    use Erlang::Parser::Node::FunLocal;
+    use Erlang::Parser::Node::FunLocalCase;
+    use Erlang::Parser::Node::Case;
 
     sub new_node {
 	my ($kind, %args) = @_;
@@ -141,24 +151,36 @@ parenorimm:
     ;
 
 immexpr:
-      ATOM			{ new_node 'Atom', atom => $_[1] }
-    | FLOAT			{ new_node 'Float', float => $_[1] }
+      FLOAT			{ new_node 'Float', float => $_[1] }
     | BASE_INTEGER		{ new_node 'BaseInteger', baseinteger => $_[1] }
     | INTEGER			{ new_node 'Integer', int => $_[1] }
     | string
     | VARIABLE OPENRECORD ATOM  { new_node 'VariableRecordAccess', $_[1], $_[3] }
     | VARIABLE newrecord	{ new_node 'VariableRecordUpdate', $_[1], @{$_[2]}[1..2] }
-    | VARIABLE			{ new_node 'Variable', variable => $_[1] }
-    | MACRO			{ new_node 'Macro', macro => substr($_[1], 1) }
     | LITERAL			{ new_node 'Literal', literal => substr($_[1], 1) }
     | list
     | tuple
     | newrecord
+    | macro
+    | variable
+    | atom
+    ;
+
+atom:
+      ATOM			{ new_node 'Atom', atom => $_[1] }
+    ;
+
+macro:
+      MACRO			{ new_node 'Macro', macro => substr($_[1], 1) }
+    ;
+
+variable:
+      VARIABLE			{ new_node 'Variable', variable => $_[1] }
     ;
 
 string:
-      STRING			{ new_node 'String', $_[1] }
-    | string STRING		{ new_node 'String', $_[1]->[1] . $_[2] }
+      STRING			{ new_node 'String', string => $_[1] }
+    | string STRING		{ $_[1]->_append($_[2]) }
     ;
 
 call:
@@ -167,11 +189,11 @@ call:
     ;
 
 intcall:
-      parenorimm LPAREN exprlist RPAREN		{ new_node 'Call', undef, $_[1], $_[3] }
+      parenorimm LPAREN exprlist RPAREN		{ new_node 'Call', function => $_[1], args => $_[3] }
     ;
 
 extcall:
-      parenorimm COLON intcall 			{ new_node 'Call', $_[1], $_[3]->[2], $_[3]->[3] }
+      parenorimm COLON intcall 			{ $_[3]->module($_[1]) }
     ;
 
 list:
@@ -185,16 +207,16 @@ listcdr:
     ;
 
 comprehension:
-      LISTOPEN expr COMPREHENSION exprlist LISTCLOSE		{ new_node 'Comprehension', $_[2], $_[4] }
-    | OPENBINARY binary COMPREHENSION exprlist CLOSEBINARY	{ new_node 'BinaryComprehension', $_[2], $_[4] }
+      LISTOPEN expr COMPREHENSION exprlist LISTCLOSE		{ new_node 'Comprehension', output => $_[2], generators => $_[4] }
+    | OPENBINARY binary COMPREHENSION exprlist CLOSEBINARY	{ new_node 'BinaryComprehension', output => $_[2], generators => $_[4] }
     ;
 
 tuple:
-      TUPLEOPEN exprlist TUPLECLOSE	{ new_node 'Tuple', $_[2] }
+      TUPLEOPEN exprlist TUPLECLOSE	{ new_node 'Tuple', elems => $_[2] }
     ;
 
 case:
-      KW_CASE expr KW_OF altlist KW_END	{ new_node 'Case', $_[2], $_[4] }
+      KW_CASE expr KW_OF altlist KW_END	{ new_node 'Case', of => $_[2], alts => $_[4] }
     ;
 
 altlist:
@@ -203,29 +225,29 @@ altlist:
     ;
 
 alt:
-      expr whenlist RARROW stmtlist	{ new_node 'Alt', $_[1], $_[2], $_[4] }
+      expr whenlist RARROW stmtlist	{ new_node 'Alt', expr => $_[1], whens => $_[2], stmts => $_[4] }
     ;
 
 fun:
       funlocal
-    | KW_FUN ATOM COLON ATOM DIVIDE INTEGER				{ new_node 'FunExt', $_[2], $_[4], $_[6] }
-    | KW_FUN MACRO COLON ATOM DIVIDE INTEGER				{ new_node 'FunExtMacro', substr($_[2], 1), $_[4], $_[6] }
-    | KW_FUN VARIABLE COLON ATOM DIVIDE INTEGER				{ new_node 'FunExtVar', $_[2], $_[4], $_[6] }
-    | KW_FUN ATOM DIVIDE INTEGER					{ new_node 'FunInt', $_[2], $_[4] }
+    | KW_FUN atom COLON ATOM DIVIDE INTEGER	{ new_node 'FunRef', module => $_[2], function => $_[4], arity => $_[6] }
+    | KW_FUN macro COLON ATOM DIVIDE INTEGER	{ new_node 'FunRef', module => $_[2], function => $_[4], arity => $_[6] }
+    | KW_FUN variable COLON ATOM DIVIDE INTEGER	{ new_node 'FunRef', module => $_[2], function => $_[4], arity => $_[6] }
+    | KW_FUN ATOM DIVIDE INTEGER		{ new_node 'FunRef', function => $_[2], arity => $_[4] }
     ;
 
 funlocal:
-      KW_FUN funlocallist KW_END					{ new_node 'FunLocal', $_[2] }
+      KW_FUN funlocallist KW_END		{ new_node 'FunLocal', cases => $_[2] }
     ;
     
 # These are not full nodes.
 funlocallist:
-      funlocalexpr							{ [$_[1]] }
-    | funlocallist SEMICOLON funlocalexpr				{ [@{$_[1]}, $_[3]] }
+      funlocalcase				{ [$_[1]] }
+    | funlocallist SEMICOLON funlocalcase	{ [@{$_[1]}, $_[3]] }
     ;
 
-funlocalexpr:
-      LPAREN exprlist RPAREN whenlist RARROW stmtlist 		{ [$_[2], $_[4], $_[6]] }
+funlocalcase:
+      LPAREN exprlist RPAREN whenlist RARROW stmtlist 		{ new_node 'FunLocalCase', args => $_[2], whens => $_[4], stmts => $_[6] }
     ;
 
 newrecord:
@@ -278,7 +300,7 @@ after:
     ;
 
 try:
-      KW_TRY exprlist opttryof opttrycatch opttryafter KW_END	{ new_node 'Try', $_[2], $_[3], $_[4], $_[5] }
+      KW_TRY exprlist opttryof opttrycatch opttryafter KW_END	{ new_node 'Try', exprs => $_[2], of => $_[3], catch => $_[4], aft => $_[5] }
     ;
 
 # These are not full nodes.
@@ -303,9 +325,9 @@ catchaltlist:
     ;
 
 catchalt:
-      ATOM COLON expr whenlist RARROW stmtlist		{ new_node 'CatchAlt', $_[1], $_[3], $_[4], $_[6] }
-    | VARIABLE COLON expr whenlist RARROW stmtlist	{ new_node 'CatchAlt', $_[1], $_[3], $_[4], $_[6] }
-    | expr whenlist RARROW stmtlist			{ new_node 'CatchAlt', undef, $_[1], $_[2], $_[4] }
+      ATOM COLON expr whenlist RARROW stmtlist		{ new_node 'Alt', catch => 1, class => $_[1], expr => $_[3], whens => $_[4], stmts => $_[6] }
+    | VARIABLE COLON expr whenlist RARROW stmtlist	{ new_node 'Alt', catch => 1, class => $_[1], expr => $_[3], whens => $_[4], stmts => $_[6] }
+    | expr whenlist RARROW stmtlist			{ new_node 'Alt', catch => 1, expr => $_[1], whens => $_[2], stmts => $_[4] }
     ;
 
 if:
