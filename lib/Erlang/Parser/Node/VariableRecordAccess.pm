@@ -12,6 +12,7 @@ has 'record'   => (is => 'rw', required => 1, isa => 'Erlang::Parser::Node::Atom
 
 sub print {
     my ($self, $fh, $depth) = @_;
+    $depth ||= 0;
 
     $self->variable->print($fh, $depth);
     print $fh '#';

@@ -11,6 +11,7 @@ has 'bexprs' => (is => 'rw', required => 1, isa => 'ArrayRef[Erlang::Parser::Nod
 
 sub print {
     my ($self, $fh, $depth) = @_;
+    $depth ||= 0;
 
     print $fh '<<';
 

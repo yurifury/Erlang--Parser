@@ -11,6 +11,7 @@ has 'atom' => (is => 'rw', required => 1, isa => 'Str');
 
 sub print {
     my ($self, $fh, $depth) = @_;
+    $depth ||= 0;
 
     if (not $self->atom =~ /^[^a-z]|[^a-zA-Z_0-9]/
 	and not $self->atom =~ /^(case|receive|after|of|end|fun|when|div|bs[lr]|bx?or|band|rem|try|catch|andalso|and|orelse|or|begin|not|if)$/) {

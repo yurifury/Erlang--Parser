@@ -12,6 +12,7 @@ has 'a'  => (is => 'rw', required => 1, does => 'Erlang::Parser::Node');
 
 sub print {
     my ($self, $fh, $depth) = @_;
+    $depth ||= 0;
 
     print $fh '(';
     print $fh $self->op;

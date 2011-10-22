@@ -13,6 +13,7 @@ has 'generators' => (is => 'rw', required => 1, isa => 'ArrayRef[Erlang::Parser:
 
 sub print {
     my ($self, $fh, $depth) = @_;
+    $depth ||= 0;
 
     print $fh $self->binary ? '<<' : '[';
     $self->output->print($fh, $depth);

@@ -12,6 +12,7 @@ has 'cdr'   => (is => 'rw', required => 1, isa => 'Maybe[Erlang::Parser::Node]')
 
 sub print {
     my ($self, $fh, $depth) = @_;
+    $depth ||= 0;
 
     print $fh '[';
     my $first = 1;

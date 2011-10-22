@@ -51,6 +51,8 @@
     use Erlang::Parser::Node::Comprehension;
     use Erlang::Parser::Node::If;
     use Erlang::Parser::Node::IfExpr;
+    use Erlang::Parser::Node::Receive;
+    use Erlang::Parser::Node::ReceiveAfter;
 
     sub new_node {
 	my ($kind, %args) = @_;
@@ -111,7 +113,7 @@ unparenexpr:
     | try
     | if
     | KW_BEGIN exprlist KW_END		{ new_node 'Begin', exprs => $_[2] }
-    | expr SEND expr			{ new_node 'BinOp', op => '!',       a => $_[0], b => $_[3] }
+    | expr SEND expr			{ new_node 'BinOp', op => '!',       a => $_[1], b => $_[3] }
     | expr LT expr			{ new_node 'BinOp', op => '<',       a => $_[1], b => $_[3] }
     | expr LTE expr			{ new_node 'BinOp', op => '=<',      a => $_[1], b => $_[3] }
     | expr GT expr			{ new_node 'BinOp', op => '>',       a => $_[1], b => $_[3] }
@@ -206,7 +208,7 @@ intcall:
     ;
 
 extcall:
-      parenorimm COLON intcall 			{ $_[3]->module($_[1]) }
+      parenorimm COLON intcall 			{ $_[3]->module($_[1]); $_[3] }
     ;
 
 list:
@@ -238,7 +240,7 @@ altlist:
     ;
 
 alt:
-      expr whenlist RARROW stmtlist	{ new_node 'Alt', expr => $_[1], whens => $_[2], stmts => $_[4] }
+      expr whenlist RARROW stmtlist	{ new_node 'Alt', expr => $_[1], whens => $_[2]->_group, stmts => $_[4] }
     ;
 
 fun:
@@ -260,7 +262,7 @@ funlocallist:
     ;
 
 funlocalcase:
-      LPAREN exprlist RPAREN whenlist RARROW stmtlist 		{ new_node 'FunLocalCase', args => $_[2], whens => $_[4], stmts => $_[6] }
+      LPAREN exprlist RPAREN whenlist RARROW stmtlist 		{ new_node 'FunLocalCase', args => $_[2], whens => $_[4]->_group, stmts => $_[6] }
     ;
 
 newrecord:
@@ -303,13 +305,13 @@ binaryqualifier:
     ;
 
 receive:
-      KW_RECEIVE altlist after KW_END				{ new_node 'Receive', $_[2], $_[3] }
+      KW_RECEIVE altlist after KW_END				{ new_node 'Receive', alts => $_[2], aft => $_[3] }
     ;
 
 # This is not a full node.
 after:
 								{ undef }
-    | KW_AFTER expr RARROW exprlist				{ [$_[2], $_[4]] }
+    | KW_AFTER expr RARROW stmtlist				{ new_node 'ReceiveAfter', time => $_[2], stmts => $_[4] }
     ;
 
 try:
@@ -338,9 +340,9 @@ catchaltlist:
     ;
 
 catchalt:
-      ATOM COLON expr whenlist RARROW stmtlist		{ new_node 'Alt', catch => 1, class => $_[1], expr => $_[3], whens => $_[4], stmts => $_[6] }
-    | VARIABLE COLON expr whenlist RARROW stmtlist	{ new_node 'Alt', catch => 1, class => $_[1], expr => $_[3], whens => $_[4], stmts => $_[6] }
-    | expr whenlist RARROW stmtlist			{ new_node 'Alt', catch => 1, expr => $_[1], whens => $_[2], stmts => $_[4] }
+      ATOM COLON expr whenlist RARROW stmtlist		{ new_node 'Alt', catch => 1, class => $_[1], expr => $_[3], whens => $_[4]->_group, stmts => $_[6] }
+    | VARIABLE COLON expr whenlist RARROW stmtlist	{ new_node 'Alt', catch => 1, class => $_[1], expr => $_[3], whens => $_[4]->_group, stmts => $_[6] }
+    | expr whenlist RARROW stmtlist			{ new_node 'Alt', catch => 1, expr => $_[1], whens => $_[2]->_group, stmts => $_[4] }
     ;
 
 if:

@@ -13,6 +13,7 @@ has 'arity'    => (is => 'rw', required => 1, isa => 'Int');
 
 sub print {
     my ($self, $fh, $depth) = @_;
+    $depth ||= 0;
 
     print $fh 'fun ';
 
@@ -21,9 +22,7 @@ sub print {
 	print $fh ':';
     }
 
-
-    $self->function->print($fh, $depth);
-    print $fh '/', $self->arity;
+    print $fh $self->function, '/', $self->arity;
 }
 
 __PACKAGE__->meta->make_immutable;

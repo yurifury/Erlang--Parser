@@ -11,6 +11,7 @@ has 'string' => (is => 'rw', required => 1, isa => 'Str');
 
 sub print {
     my ($self, $fh, $depth) = @_;
+    $depth ||= 0;
 
     my $string = $self->string;
     $string =~ s/\\/\\\\/g;

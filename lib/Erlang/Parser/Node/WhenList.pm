@@ -25,6 +25,7 @@ sub _group () {
 
 sub print {
     my ($self, $fh, $depth) = @_;
+    $depth ||= 0;
 
     if (@{$self->groups}) {
 	print $fh 'when ';

@@ -13,9 +13,10 @@ has 'args'     => (is => 'rw', required => 1, isa => 'ArrayRef[Erlang::Parser::N
 
 sub print {
     my ($self, $fh, $depth) = @_;
+    $depth ||= 0;
 
     if (defined $self->module) {
-	$self->mod->print($fh, $depth);
+	$self->module->print($fh, $depth);
 	print $fh ':';
     }
 

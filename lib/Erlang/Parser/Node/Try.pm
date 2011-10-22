@@ -14,6 +14,7 @@ has 'aft'   => (is => 'rw', required => 0, isa => 'Maybe[ArrayRef[Erlang::Parser
 
 sub print {
     my ($self, $fh, $depth) = @_;
+    $depth ||= 0;
 
     print $fh "try\n";
 
@@ -29,7 +30,7 @@ sub print {
     $depth--;
     print $fh "\n", "\t" x $depth;
 
-    if (@{$self->of}) {
+    if (defined $self->of and @{$self->of}) {
 	print $fh "of\n";
 
 	$depth++;
@@ -45,7 +46,7 @@ sub print {
 	print $fh "\n", "\t" x $depth;
     }
 
-    if (@{$self->catch}) {
+    if (defined $self->catch and @{$self->catch}) {
 	print $fh "catch\n";
 
 	$depth++;
@@ -61,7 +62,7 @@ sub print {
 	print $fh "\n", "\t" x $depth;
     }
 
-    if (@{$self->aft}) {
+    if (defined $self->aft and @{$self->aft}) {
 	print $fh "after\n";
 
 	$depth++;

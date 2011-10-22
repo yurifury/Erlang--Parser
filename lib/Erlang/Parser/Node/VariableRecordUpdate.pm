@@ -12,6 +12,7 @@ has 'update'   => (is => 'rw', required => 1, isa => 'Erlang::Parser::Node::Reco
 
 sub print {
     my ($self, $fh, $depth) = @_;
+    $depth ||= 0;
 
     $self->variable->print($fh, $depth);
     $self->update->print($fh, $depth);

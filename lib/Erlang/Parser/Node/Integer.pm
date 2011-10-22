@@ -11,7 +11,8 @@ has 'int' => (is => 'rw', required => 1, isa => 'Int');
 
 sub print {
     my ($self, $fh, $depth) = @_;
-    print $self->int;
+    $depth ||= 0;
+    print $fh $self->int;
 }
 
 __PACKAGE__->meta->make_immutable;

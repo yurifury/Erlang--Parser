@@ -11,7 +11,8 @@ has 'float' => (is => 'rw', required => 1, isa => 'Num');
 
 sub print {
     my ($self, $fh, $depth) = @_;
-    print $self->float;
+    $depth ||= 0;
+    print $fh $self->float;
 }
 
 __PACKAGE__->meta->make_immutable;

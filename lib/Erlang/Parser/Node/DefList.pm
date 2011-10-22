@@ -17,6 +17,7 @@ sub _append {
 
 sub print {
     my ($self, $fh, $depth) = @_;
+    $depth ||= 0;
 
     my $first = 1;
     foreach (@{$self->defs}) {

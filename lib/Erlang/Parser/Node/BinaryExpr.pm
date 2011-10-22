@@ -13,6 +13,7 @@ has 'qualifier' => (is => 'rw', required => 0, isa => 'Maybe[Str]');
 
 sub print {
     my ($self, $fh, $depth) = @_;
+    $depth ||= 0;
 
     print $fh '(';
     $self->output->print($fh, $depth);

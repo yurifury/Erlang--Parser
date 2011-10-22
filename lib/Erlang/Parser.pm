@@ -7,7 +7,6 @@ package Erlang::Parser;
 use strict;
 use warnings;
 
-use Erlang::Parser::Dumper;
 use Erlang::Parser::Lexer;
 use Erlang::Parser::Parser;
 
@@ -25,12 +24,6 @@ sub error {
     print STDERR ", value ", $_[0]->YYCurval;
     print STDERR ", expected ", join(',', $_[0]->YYExpect);
     print STDERR ".\n";
-}
-
-sub print_nodes {
-    my ($class, $fh, @nodes) = @_;
-    Erlang::Parser::Dumper->depth(0);
-    Erlang::Parser::Dumper->print_node($fh, @$_) foreach (@nodes);
 }
 
 =head1 NAME

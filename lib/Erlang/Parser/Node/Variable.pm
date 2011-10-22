@@ -11,6 +11,7 @@ has 'variable' => (is => 'rw', required => 1, isa => 'Str');
 
 sub print {
     my ($self, $fh, $depth) = @_;
+    $depth ||= 0;
 
     print $fh $self->variable;
 }

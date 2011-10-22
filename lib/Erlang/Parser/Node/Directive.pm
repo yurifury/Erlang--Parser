@@ -12,6 +12,7 @@ has 'args'      => (is => 'rw', required => 1, isa => 'ArrayRef[Erlang::Parser::
 
 sub print {
     my ($self, $fh, $depth) = @_;
+    $depth ||= 0;
 
     print $fh "-", $self->directive, "(";
     my $first = 1;

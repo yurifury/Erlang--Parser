@@ -11,7 +11,8 @@ has 'baseinteger' => (is => 'rw', required => 1, isa => 'Str');
 
 sub print {
     my ($self, $fh, $depth) = @_;
-    print $self->baseinteger;
+    $depth ||= 0;
+    print $fh $self->baseinteger;
 }
 
 __PACKAGE__->meta->make_immutable;
