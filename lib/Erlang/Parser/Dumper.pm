@@ -25,71 +25,11 @@ sub print_node {
     my $fh = shift;
     my $kind = shift;
 
-    if ($kind eq 'directive') {
-	my ($directive, $args) = @_;
-	print $fh "-$directive(";
-	my $first = 1;
-	foreach (@$args) {
-	    if ($first) { $first = 0 } else { print $fh ', ' }
-	    $class->print_node($fh, @$_);
-	}
-	print $fh ").\n";
-    } elsif ($kind eq 'atom') {
-	if (not $_[0] =~ /^[^a-z]|[^a-zA-Z_0-9]/
-	    and not $_[0] =~ /^(case|receive|after|of|end|fun|when|div|bs[lr]|bx?or|band|rem|try|catch|andalso|and|orelse|or|begin|not|if)$/) {
-	    print $fh "$_[0]";
-	} else {
-	    my $atom = $_[0];
-	    $atom =~ s/\\/\\\\/g;
-	    $atom =~ s/'/\\'/g;
-
-	    print $fh "'$atom'";
-	}
-    } elsif ($kind eq 'list') {
-	print $fh '[';
-	my $first = 1;
-	foreach (@{$_[0]}) {
-	    if ($first) { $first = 0 } else { print $fh ', ' }
-	    $class->print_node($fh, @$_);
-	}
-	print $fh ']';
-    } elsif ($kind eq 'divide') {
-	print $fh '(';
-	$class->print_node($fh, @{$_[0]});
-	print $fh '/';
-	$class->print_node($fh, @{$_[1]});
-	print $fh ')';
-    } elsif ($kind eq 'multiply') {
-	print $fh '(';
-	$class->print_node($fh, @{$_[0]});
-	print $fh '*';
-	$class->print_node($fh, @{$_[1]});
-	print $fh ')';
-    } elsif ($kind eq 'add') {
-	print $fh '(';
-	$class->print_node($fh, @{$_[0]});
-	print $fh '+';
-	$class->print_node($fh, @{$_[1]});
-	print $fh ')';
-    } elsif ($kind eq 'neg') {
+    if ($kind eq 'neg') {
 	print $fh '(';
 	print $fh '-';
 	$class->print_node($fh, @{$_[0]});
 	print $fh ')';
-    } elsif ($kind eq 'subtract') {
-	print $fh '(';
-	$class->print_node($fh, @{$_[0]});
-	print $fh '-';
-	$class->print_node($fh, @{$_[1]});
-	print $fh ')';
-    } elsif ($kind eq 'equals') {
-	$class->print_node($fh, @{$_[0]});
-	print $fh ' = ';
-	$class->print_node($fh, @{$_[1]});
-    } elsif ($kind eq 'integer') {
-	print $fh $_[0];
-    } elsif ($kind eq 'float') {
-	print $fh $_[0];
     } elsif ($kind eq 'deflist') {
 	my $first = 1;
 	foreach (@{$_[0]}) {
@@ -348,34 +288,6 @@ sub print_node {
 	}
 	
 	print $fh "\n", "\t" x $depth, "end";
-    } elsif ($kind eq 'list-add') {
-	print $fh '(';
-	$class->print_node($fh, @{$_[0]});
-	print $fh '++';
-	$class->print_node($fh, @{$_[1]});
-	print $fh ')';
-    } elsif ($kind eq 'list-subtract') {
-	print $fh '(';
-	$class->print_node($fh, @{$_[0]});
-	print $fh '--';
-	$class->print_node($fh, @{$_[1]});
-	print $fh ')';
-    } elsif ($kind eq 'lte') {
-	$class->print_node($fh, @{$_[0]});
-	print $fh ' =< ';
-	$class->print_node($fh, @{$_[1]});
-    } elsif ($kind eq 'gte') {
-	$class->print_node($fh, @{$_[0]});
-	print $fh ' >= ';
-	$class->print_node($fh, @{$_[1]});
-    } elsif ($kind eq 'lt') {
-	$class->print_node($fh, @{$_[0]});
-	print $fh ' < ';
-	$class->print_node($fh, @{$_[1]});
-    } elsif ($kind eq 'gt') {
-	$class->print_node($fh, @{$_[0]});
-	print $fh ' > ';
-	$class->print_node($fh, @{$_[1]});
     } elsif ($kind eq 'base-integer') {
 	print $fh $_[0];
     } elsif ($kind eq 'comprehension') {
@@ -400,26 +312,6 @@ sub print_node {
 	    $class->print_node($fh, @$_);
 	}
 	print $fh '>>';
-    } elsif ($kind eq 'larrow') {
-	$class->print_node($fh, @{$_[0]});
-	print $fh ' <- ';
-	$class->print_node($fh, @{$_[1]});
-    } elsif ($kind eq 'ldarrow') {
-	$class->print_node($fh, @{$_[0]});
-	print $fh ' <= ';
-	$class->print_node($fh, @{$_[1]});
-    } elsif ($kind eq 'not-equal') {
-	$class->print_node($fh, @{$_[0]});
-	print $fh ' =/= ';
-	$class->print_node($fh, @{$_[1]});
-    } elsif ($kind eq 'equality') {
-	$class->print_node($fh, @{$_[0]});
-	print $fh ' == ';
-	$class->print_node($fh, @{$_[1]});
-    } elsif ($kind eq 'strictly-equal') {
-	$class->print_node($fh, @{$_[0]});
-	print $fh ' =:= ';
-	$class->print_node($fh, @{$_[1]});
     } elsif ($kind eq 'begin') {
 	print $fh "begin\n";
 
@@ -438,22 +330,6 @@ sub print_node {
     } elsif ($kind eq 'not') {
 	print $fh '(not ';
 	$class->print_node($fh, @{$_[0]});
-	print $fh ')';
-    } elsif ($kind eq 'bor' or $kind eq 'band' or $kind eq 'bxor' or
-	     $kind eq 'bsl' or $kind eq 'bsr' or
-	     $kind eq 'div' or $kind eq 'rem' or
-	     $kind eq 'and' or $kind eq 'or' or
-	     $kind eq 'andalso' or $kind eq 'orelse') {
-	print $fh '(';
-	$class->print_node($fh, @{$_[0]});
-	print $fh " $kind ";
-	$class->print_node($fh, @{$_[1]});
-	print $fh ')';
-    } elsif ($kind eq 'send') {
-	print $fh '(';
-	$class->print_node($fh, @{$_[0]});
-	print $fh ' ! ';
-	$class->print_node($fh, @{$_[1]});
 	print $fh ')';
     } elsif ($kind eq 'literal') {
 	print $fh '$';

@@ -2,7 +2,7 @@
 # This is free software; you can redistribute it and/or modify it under the
 # same terms as Perl itself.
 
-package Erlang::Parser::Node::Directive;
+package Erlang::Parser::Node::List;
 
 use strict;
 use warnings;
@@ -10,28 +10,32 @@ use warnings;
 use Erlang::Parser::Node;
 our @ISA = ('Erlang::Parser::Node');
 
-our $KIND = 'Directive';
+our $KIND = 'List';
 
 sub new {
-    my ($class, $name, $args) = @_;
+    my ($class, $elems) = @_;
     my $self = $class->SUPER::new($KIND);
 
-    $self->{NAME} = $name;
-    $self->{ARGS} = [map { $_->copy } @$args];
+    $self->{ELEMS} = [map { $_->copy } @$elems];
 
     bless $self, $class;
+}
+
+sub copy {
+    my $self = shift;
+    Erlang::Parser::Node::List->new($self->{ELEMS});
 }
 
 sub print {
     my ($self, $fh) = @_;
 
-    print $fh "-$self->{NAME}(";
+    print $fh '[';
     my $first = 1;
-    foreach (@{$self->{ARGS}}) {
+    foreach (@{$self->{ELEMS}}) {
 	if ($first) { $first = 0 } else { print $fh ', ' }
 	$_->print($fh);
     }
-    print $fh ").\n";
+    print $fh ']';
 }
 
 1;

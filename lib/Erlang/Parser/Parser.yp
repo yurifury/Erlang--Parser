@@ -20,6 +20,10 @@
     use Erlang::Parser::Node::DefList;
     use Erlang::Parser::Node::Def;
     use Erlang::Parser::Node::WhenList;
+    use Erlang::Parser::Node::Atom;
+    use Erlang::Parser::Node::Integer;
+    use Erlang::Parser::Node::BinOp;
+    use Erlang::Parser::Node::List;
 
     sub new_node {
 	my ($kind, @args) = @_;
@@ -84,40 +88,40 @@ unparenexpr:
     | try
     | if
     | KW_BEGIN exprlist KW_END		{ new_node 'Begin', $_[2] }
-    | expr SEND expr			{ new_node 'Send', $_[0], $_[3] }
-    | expr LT expr			{ new_node 'Lt', $_[1], $_[3] }
-    | expr LTE expr			{ new_node 'Lte', $_[1], $_[3] }
-    | expr GT expr			{ new_node 'Gt', $_[1], $_[3] }
-    | expr GTE expr			{ new_node 'Gte', $_[1], $_[3] }
-    | expr DIVIDE expr			{ new_node 'Divide', $_[1], $_[3] }
-    | expr KW_DIV expr			{ new_node 'Div', $_[1], $_[3] }
-    | expr MULTIPLY expr		{ new_node 'Multiply', $_[1], $_[3] }
-    | expr ADD expr			{ new_node 'Add', $_[1], $_[3] }
-    | expr SUBTRACT expr		{ new_node 'Subtract', $_[1], $_[3] }
-    | expr MATCH expr			{ new_node 'Match', $_[1], $_[3] }
-    | expr LISTADD expr			{ new_node 'ListAdd', $_[1], $_[3] }
-    | expr LISTSUBTRACT expr		{ new_node 'ListSubtract', $_[1], $_[3] }
-    | expr EQUAL expr			{ new_node 'Equal', $_[1], $_[3] }
-    | expr EXACTLY_EQUAL expr		{ new_node 'ExactlyEqual', $_[1], $_[3] }
-    | expr EXACTLY_NOT_EQUAL expr	{ new_node 'ExactlyNotEqual', $_[1], $_[3] }
-    | expr NOT_EQUAL expr		{ new_node 'NotEqual', $_[1], $_[3] }
-    | expr KW_BSL expr			{ new_node 'Bsl', $_[1], $_[3] }
-    | expr KW_BSR expr			{ new_node 'Bsr', $_[1], $_[3] }
-    | expr KW_BOR expr			{ new_node 'Bor', $_[1], $_[3] }
-    | expr KW_BAND expr			{ new_node 'Band', $_[1], $_[3] }
-    | expr KW_BXOR expr			{ new_node 'Bxor', $_[1], $_[3] }
-    | expr KW_REM expr			{ new_node 'Rem', $_[1], $_[3] }
-    | expr KW_ANDALSO expr		{ new_node 'AndAlso', $_[1], $_[3] }
-    | expr KW_ORELSE expr		{ new_node 'OrElse', $_[1], $_[3] }
-    | expr KW_AND expr			{ new_node 'And', $_[1], $_[3] }
-    | expr KW_OR expr			{ new_node 'Or', $_[1], $_[3] }
+    | expr SEND expr			{ new_node 'BinOp', '!',       $_[0], $_[3] }
+    | expr LT expr			{ new_node 'BinOp', '<',       $_[1], $_[3] }
+    | expr LTE expr			{ new_node 'BinOp', '=<',      $_[1], $_[3] }
+    | expr GT expr			{ new_node 'BinOp', '>',       $_[1], $_[3] }
+    | expr GTE expr			{ new_node 'BinOp', '>=',      $_[1], $_[3] }
+    | expr DIVIDE expr			{ new_node 'BinOp', '/',       $_[1], $_[3] }
+    | expr KW_DIV expr			{ new_node 'BinOp', 'div',     $_[1], $_[3] }
+    | expr MULTIPLY expr		{ new_node 'BinOp', '*',       $_[1], $_[3] }
+    | expr ADD expr			{ new_node 'BinOp', '+',       $_[1], $_[3] }
+    | expr SUBTRACT expr		{ new_node 'BinOp', '-',       $_[1], $_[3] }
+    | expr MATCH expr			{ new_node 'BinOp', '=',       $_[1], $_[3] }
+    | expr LISTADD expr			{ new_node 'BinOp', '++',      $_[1], $_[3] }
+    | expr LISTSUBTRACT expr		{ new_node 'BinOp', '--',      $_[1], $_[3] }
+    | expr EQUAL expr			{ new_node 'BinOp', '==',      $_[1], $_[3] }
+    | expr EXACTLY_EQUAL expr		{ new_node 'BinOp', '=:=',     $_[1], $_[3] }
+    | expr EXACTLY_NOT_EQUAL expr	{ new_node 'BinOp', '=/=',     $_[1], $_[3] }
+    | expr NOT_EQUAL expr		{ new_node 'BinOp', '/=',      $_[1], $_[3] }
+    | expr KW_BSL expr			{ new_node 'BinOp', 'bsl',     $_[1], $_[3] }
+    | expr KW_BSR expr			{ new_node 'BinOp', 'bsr',     $_[1], $_[3] }
+    | expr KW_BOR expr			{ new_node 'BinOp', 'bor',     $_[1], $_[3] }
+    | expr KW_BAND expr			{ new_node 'BinOp', 'band',    $_[1], $_[3] }
+    | expr KW_BXOR expr			{ new_node 'BinOp', 'bxor',    $_[1], $_[3] }
+    | expr KW_REM expr			{ new_node 'BinOp', 'rem',     $_[1], $_[3] }
+    | expr KW_ANDALSO expr		{ new_node 'BinOp', 'andalso', $_[1], $_[3] }
+    | expr KW_ORELSE expr		{ new_node 'BinOp', 'orelse',  $_[1], $_[3] }
+    | expr KW_AND expr			{ new_node 'BinOp', 'and',     $_[1], $_[3] }
+    | expr KW_OR expr			{ new_node 'BinOp', 'or',      $_[1], $_[3] }
     | SUBTRACT expr %prec NEG		{ new_node 'Neg', $_[2] }
     | KW_NOT expr			{ new_node 'Not', $_[2] }
     | KW_CATCH expr			{ new_node 'CatchExpr', $_[2] }
 
     # TODO: unhack this.
-    | expr LARROW expr		{ new_node 'LArrow', $_[1], $_[3] }
-    | expr LDARROW expr		{ new_node 'LdArrow', $_[1], $_[3] }
+    | expr LARROW expr		{ new_node 'BinOp', '<-', $_[1], $_[3] }
+    | expr LDARROW expr		{ new_node 'BinOp', '<=', $_[1], $_[3] }
 
     | call
     ;

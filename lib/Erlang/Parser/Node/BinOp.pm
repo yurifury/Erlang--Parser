@@ -2,7 +2,7 @@
 # This is free software; you can redistribute it and/or modify it under the
 # same terms as Perl itself.
 
-package Erlang::Parser::Node::Directive;
+package Erlang::Parser::Node::BinOp;
 
 use strict;
 use warnings;
@@ -10,28 +10,32 @@ use warnings;
 use Erlang::Parser::Node;
 our @ISA = ('Erlang::Parser::Node');
 
-our $KIND = 'Directive';
+our $KIND = 'BinOp';
 
 sub new {
-    my ($class, $name, $args) = @_;
+    my ($class, $op, $a, $b) = @_;
     my $self = $class->SUPER::new($KIND);
 
-    $self->{NAME} = $name;
-    $self->{ARGS} = [map { $_->copy } @$args];
+    $self->{OP} = $op;
+    $self->{A} = $a;
+    $self->{B} = $b;
 
     bless $self, $class;
+}
+
+sub copy {
+    my $self = shift;
+    Erlang::Parser::Node::BinOp->new($self->{OP}, $self->{A}, $self->{B});
 }
 
 sub print {
     my ($self, $fh) = @_;
 
-    print $fh "-$self->{NAME}(";
-    my $first = 1;
-    foreach (@{$self->{ARGS}}) {
-	if ($first) { $first = 0 } else { print $fh ', ' }
-	$_->print($fh);
-    }
-    print $fh ").\n";
+    print $fh '(';
+    $self->{A}->print($fh);
+    print $fh $self->{OP};
+    $self->{B}->print($fh);
+    print $fh ')';
 }
 
 1;
