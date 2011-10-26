@@ -370,6 +370,14 @@ ifseq:
 
 Creates a new parser object. See L<Parse::Yapp> for more information.
 
+=item C<new_node>
+
+Helper function used to create new nodes.
+
+    # These are identical.
+    my $n1 = new_node('X', @y);
+    my $n2 = Erlang::Parser::Node::X->new(@y);
+
 =cut
 
 1;
