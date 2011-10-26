@@ -5,9 +5,7 @@
 package Erlang::Parser::Node;
 
 use Moose::Role;
-use MooseX::Clone;
 
-with 'MooseX::Clone';
 requires qw/print/;
 
 1;

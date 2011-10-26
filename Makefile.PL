@@ -21,6 +21,7 @@ WriteMakefile(
 	Parse::Lex	2.20
 	Parse::Yapp	0
 	Test::More	0
+	Moose		0
     )},
     dist 		=> { COMPRESS => 'gzip -9f', SUFFIX => 'gz' },
     clean 		=> { FILES => 'Erlang-Parser-*' },
