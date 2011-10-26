@@ -17,7 +17,7 @@ sub print {
     my ($self, $fh, $depth) = @_;
     $depth ||= 0;
 
-    print $fh $self->class, ':' if defined $self->class;
+    print $fh $self->class, ':' if defined($self->class);
     $self->expr->print($fh, $depth);
     $depth++;
     print $fh ' ';

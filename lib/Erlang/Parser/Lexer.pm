@@ -12,6 +12,7 @@ use Parse::Lex;
 # NOTE: not re-entrant due to P::L fun.
 our $lexer_string = '';
 our $skip_token = 0;
+our $lex_failed = 0;
 
 our ($ATOM, $FLOAT, $INTEGER, $BASE_INTEGER, $LIT, $STRING, $CONTENT);
 our ($ACONTENT, $ALIT, $AATOM, $OPENATOM);
@@ -135,7 +136,7 @@ our @tokens = (
     PIPE		=> q/\|/,
     SEND		=> q/!/,
     LITERAL		=> q/\$(\\\\.|(?s:.))/,
-    ERROR		=> q/.*/, sub { die qq{can't analyse: "$_[1]"} },
+    ERROR		=> q/.*/, sub { $lex_failed = $_[1]; },
 );
 
 Parse::Lex->exclusive(qw(dqstr sqatom));
@@ -150,11 +151,15 @@ sub lex {
 	my $token;
 
 	$skip_token = 0;
+	$lex_failed = '';
 
 	LOOP:while (1) {
 	    $token = $lex->next;
 
-	    if ($lex->eoi or not $token) {
+	    if ($lex->eoi) {
+		return ('', undef);
+	    } elsif ($lex_failed) {
+		print STDERR "can't analyse: \"", $lex_failed, "\"\n";
 		return ('', undef);
 	    } elsif (not $skip_token) {
 		last LOOP;
