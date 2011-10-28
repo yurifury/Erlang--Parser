@@ -28,6 +28,44 @@ sub print {
 
 __PACKAGE__->meta->make_immutable;
 
+=head1 NAME
+
+Erlang::Parser::Node::BinOp - a block of statements
+
+=head1 DESCRIPTION
+
+An infix binary operation.
+
+=head2 Accessors
+
+=over 4
+
+=item C<op>
+
+The operation as a string (i.e. '+' for addition, '--' for list difference).
+
+=item C<a>, C<b>
+
+The first and second L<Erlang::Parser::Node> arguments to the operation.
+
+=back
+
+=head2 Methods
+
+=over 4
+
+=item C<print>
+
+Pretty-prints the node to its filehandle argument.
+
+=back
+
+=head1 EXAMPLE
+
+    1 + 1
+
+=cut
+
 1;
 
 # vim: set sw=4:

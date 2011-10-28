@@ -34,6 +34,49 @@ sub print {
 
 __PACKAGE__->meta->make_immutable;
 
+=head1 NAME
+
+Erlang::Parser::Node::Case - a case expression
+
+=head1 DESCRIPTION
+
+An expression which tries several different pattern matches and guards.
+
+=head2 Accessors
+
+=over 4
+
+=item C<of>
+
+An L<Erlang::Parser::Node> which is evaluated to be matched against C<alts>.
+
+=item C<alts>
+
+A list of L<Erlang::Parser::Node::Alt>s which are tried against C<of> in turn.
+
+=back
+
+=head2 Methods
+
+=over 4
+
+=item C<print>
+
+Pretty-prints the node to its filehandle argument.
+
+=back
+
+=head1 EXAMPLE
+
+    case ?MODULE:myfun() of
+	{X, Y} ->
+	    io:format("I'm a tuple! ~p, ~p~n", [X, Y]);
+	[X, Y] = Z ->
+	    io:format("I'm a list! ~p, ~p~n", Z)
+    end
+
+=cut
+
 1;
 
 # vim: set sw=4:

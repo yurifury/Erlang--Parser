@@ -29,6 +29,51 @@ sub print {
 
 __PACKAGE__->meta->make_immutable;
 
+=head1 NAME
+
+Erlang::Parser::Node::Comprehension - a list or binary comprehension
+
+=head1 DESCRIPTION
+
+Used to generate (binary) lists/strings by a combination of generators, guards
+and output expressions.
+
+=head2 Accessors
+
+=over 4
+
+=item C<binary>
+
+True if this is a binary comprehension.
+
+=item C<output>
+
+The L<Erlang::Parser::Node> which forms the output elements based on
+C<generators>.
+
+=item C<generators>
+
+A mixture of generators (in the form C<<X <- Y>> or C<<X <= Y>>) and guards
+which create the terms used by C<output>.
+
+=back
+
+=head2 Methods
+
+=over 4
+
+=item C<print>
+
+Pretty-prints the node to its filehandle argument.
+
+=back
+
+=head1 EXAMPLE
+
+    [X + Y || X <- [1, 2, 3], Y <- [1, 2, 3], X + Y > 2]
+
+=cut
+
 1;
 
 # vim: set sw=4:

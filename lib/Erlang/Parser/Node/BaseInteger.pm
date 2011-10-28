@@ -17,6 +17,40 @@ sub print {
 
 __PACKAGE__->meta->make_immutable;
 
+=head1 NAME
+
+Erlang::Parser::Node::BaseInteger - a number with base
+
+=head1 DESCRIPTION
+
+A number with a specified base.
+
+=head2 Accessors
+
+=over 4
+
+=item C<baseinteger>
+
+The string representation of the number.
+
+=back
+
+=head2 Methods
+
+=over 4
+
+=item C<print>
+
+Pretty-prints the node to its filehandle argument.
+
+=back
+
+=head1 EXAMPLE
+
+    16#f7f7f7f7
+
+=cut
+
 1;
 
 # vim: set sw=4:

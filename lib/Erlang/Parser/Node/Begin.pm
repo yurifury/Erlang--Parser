@@ -31,6 +31,44 @@ sub print {
 
 __PACKAGE__->meta->make_immutable;
 
+=head1 NAME
+
+Erlang::Parser::Node::Begin - a block of statements
+
+=head1 DESCRIPTION
+
+A block of statements; a glorified parenthesis.
+
+=head2 Accessors
+
+=over 4
+
+=item C<exprs>
+
+A list of L<Erlang::Parser::Node>s; the body for this block. The last
+expression is the value for the block.
+
+=back
+
+=head2 Methods
+
+=over 4
+
+=item C<print>
+
+Pretty-prints the node to its filehandle argument.
+
+=back
+
+=head1 EXAMPLE
+
+    begin
+        do_this(),
+	xyz:do_that()
+    end
+
+=cut
+
 1;
 
 # vim: set sw=4:

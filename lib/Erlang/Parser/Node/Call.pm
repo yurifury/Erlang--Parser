@@ -34,6 +34,52 @@ sub print {
 
 __PACKAGE__->meta->make_immutable;
 
+=head1 NAME
+
+Erlang::Parser::Node::Call - a function call
+
+=head1 DESCRIPTION
+
+A call to a function, either local or external.
+
+=head2 Accessors
+
+=over 4
+
+=item C<module>
+
+A L<Erlang::Parser::Node> which returns the name of the module to use as an
+atom; or C<undef>.
+
+=item C<function>
+
+A L<Erlang::Parser::Node> which either returns an atom which corresponds to a
+local function or a function in C<module> if specified; or which returns a
+calculated fun or fun reference itself.
+
+=item C<args>
+
+A list of L<Erlang::Parser::Node>s which are passed as arguments to the
+function.
+
+=back
+
+=head2 Methods
+
+=over 4
+
+=item C<print>
+
+Pretty-prints the node to its filehandle argument.
+
+=back
+
+=head1 EXAMPLE
+
+    lists:reverse([1, 2, 3])
+
+=cut
+
 1;
 
 # vim: set sw=4:

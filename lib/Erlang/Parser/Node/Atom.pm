@@ -27,6 +27,40 @@ sub print {
 
 __PACKAGE__->meta->make_immutable;
 
+=head1 NAME
+
+Erlang::Parser::Node::Atom - a plain atom
+
+=head1 DESCRIPTION
+
+The basic symbol unit in Erlang.
+
+=head2 Accessors
+
+=over 4
+
+=item C<atom>
+
+The string representation of the atom>
+
+=back
+
+=head2 Methods
+
+=over 4
+
+=item C<print>
+
+Pretty-prints the node to its filehandle argument.
+
+=back
+
+=head1 EXAMPLE
+
+    my.atom@is.long.
+
+=cut
+
 1;
 
 # vim: set sw=4:
