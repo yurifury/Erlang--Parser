@@ -7,7 +7,7 @@ package Erlang::Parser::Node::WhenList;
 use Moose;
 with 'Erlang::Parser::Node';
 
-has 'groups' => (is => 'rw', default => sub {[]}, isa => 'AraryRef[ArrayRef[Erlang::Parser::Node]]');
+has 'groups' => (is => 'rw', default => sub {[]}, isa => 'ArrayRef[ArrayRef[Erlang::Parser::Node]]');
 has 'exprs'  => (is => 'rw', default => sub {[]}, isa => 'ArrayRef[Erlang::Parser::Node]');
 
 sub _append {
