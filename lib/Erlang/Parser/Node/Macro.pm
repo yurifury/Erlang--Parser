@@ -18,6 +18,40 @@ sub print {
 
 __PACKAGE__->meta->make_immutable;
 
+=head1 NAME
+
+Erlang::Parser::Node::Macro - a preprocessor-style macro
+
+=head1 DESCRIPTION
+
+Defined with the -define() directive; expands as any node.
+
+=head2 Accessors
+
+=over 4
+
+=item C<macro>
+
+The name of the macro being invoked.
+
+=back
+
+=head2 Methods
+
+=over 4
+
+=item C<print>
+
+Pretty-prints the node to its filehandle argument.
+
+=back
+
+=head1 EXAMPLE
+
+    ?MODULE
+
+=cut
+
 1;
 
 # vim: set sw=4:

@@ -21,6 +21,45 @@ sub print {
 
 __PACKAGE__->meta->make_immutable;
 
+=head1 NAME
+
+Erlang::Parser::Node::VariableRecordAccess - variable record access
+
+=head1 DESCRIPTION
+
+An access of a variable record's component.
+
+=head2 Accessors
+
+=over 4
+
+=item C<variable>
+
+The L<Erlang::Parser::Node::Variable> which is being accessed.
+
+=item C<record>
+
+An L<Erlang::Parser::Node::Atom> which defines the record and (!) the record
+part. (TODO)
+
+=back
+
+=head2 Methods
+
+=over 4
+
+=item C<print>
+
+Pretty-prints the node to its filehandle argument.
+
+=back
+
+=head1 EXAMPLE
+
+    MyVar#state.part
+
+=cut
+
 1;
 
 # vim: set sw=4:

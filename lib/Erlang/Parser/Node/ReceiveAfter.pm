@@ -31,6 +31,47 @@ sub print {
 
 __PACKAGE__->meta->make_immutable;
 
+=head1 NAME
+
+Erlang::Parser::Node::ReceiveAfter - the after clause for a receive statement
+
+=head1 DESCRIPTION
+
+Specifies the length of time after which the clause should activate, and the
+statement block to execute in that case.
+
+=head2 Accessors
+
+=over 4
+
+=item C<time>
+
+A L<Erlang::Parser::Node> that yields the number of milliseconds, or the atom
+infinity.
+
+=item C<stmts>
+
+A list of L<Erlang::Parser::Node>s to run if the timeout is activated.
+
+=back
+
+=head2 Methods
+
+=over 4
+
+=item C<print>
+
+Pretty-prints the node to its filehandle argument.
+
+=back
+
+=head1 EXAMPLE
+
+    after X ->
+	Y
+
+=cut
+
 1;
 
 # vim: set sw=4:

@@ -18,6 +18,40 @@ sub print {
 
 __PACKAGE__->meta->make_immutable;
 
+=head1 NAME
+
+Erlang::Parser::Node::Variable - a variable
+
+=head1 DESCRIPTION
+
+Any use or reference to a variable, bound or unbound.
+
+=head2 Accessors
+
+=over 4
+
+=item C<variable>
+
+The name of the variable.
+
+=back
+
+=head2 Methods
+
+=over 4
+
+=item C<print>
+
+Pretty-prints the node to its filehandle argument.
+
+=back
+
+=head1 EXAMPLE
+
+    Argument
+
+=cut
+
 1;
 
 # vim: set sw=4:

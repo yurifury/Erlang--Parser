@@ -25,6 +25,40 @@ sub print {
 
 __PACKAGE__->meta->make_immutable;
 
+=head1 NAME
+
+Erlang::Parser::Node::Tuple - a tuple of items
+
+=head1 DESCRIPTION
+
+A set number of items; if you need something with variable length, use lists.
+
+=head2 Accessors
+
+=over 4
+
+=item C<elems>
+
+The L<Erlang::Parser::Node>s which make up the tuple's elements.
+
+=back
+
+=head2 Methods
+
+=over 4
+
+=item C<print>
+
+Pretty-prints the node to its filehandle argument.
+
+=back
+
+=head1 EXAMPLE
+
+    {1, 2, 3}
+
+=cut
+
 1;
 
 # vim: set sw=4:

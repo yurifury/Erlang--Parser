@@ -7,7 +7,7 @@ package Erlang::Parser::Node::WhenList;
 use Moose;
 with 'Erlang::Parser::Node';
 
-has 'groups' => (is => 'rw', default => sub {[]});#, isa => 'AraryRef[ArrayRef[Erlang::Parser::Node]]');
+has 'groups' => (is => 'rw', default => sub {[]}, isa => 'AraryRef[ArrayRef[Erlang::Parser::Node]]');
 has 'exprs'  => (is => 'rw', default => sub {[]}, isa => 'ArrayRef[Erlang::Parser::Node]');
 
 sub _append {
@@ -44,6 +44,49 @@ sub print {
 }
 
 __PACKAGE__->meta->make_immutable;
+
+=head1 NAME
+
+Erlang::Parser::Node::WhenList - a guard sequence
+
+=head1 DESCRIPTION
+
+Used to restrict the circumstances under which a pattern match will match;
+comprised of guards separated by semi-colons, each which is comprised of
+several guard expressions separated by commas. The guard sequence as a whole
+passes if all guard expressions in any guard pass.
+
+=head2 Accessors
+
+=over 4
+
+=item C<groups>
+
+A list of a list of L<Erlang::Parser::Node>s; each individual list of nodes is
+a guard (and each node a guard expression).
+
+=item C<exprs>
+
+Used only during construction of the guard sequence; should be empty after
+parsing is complete.
+
+=back
+
+=head2 Methods
+
+=over 4
+
+=item C<print>
+
+Pretty-prints the node to its filehandle argument.
+
+=back
+
+=head1 EXAMPLE
+
+    when is_bool(X), is_bool(Y); X < Y
+
+=cut
 
 1;
 

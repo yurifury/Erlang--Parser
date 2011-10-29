@@ -29,6 +29,44 @@ sub print {
 
 __PACKAGE__->meta->make_immutable;
 
+=head1 NAME
+
+Erlang::Parser::Node::RecordNew - creation of a new record
+
+=head1 DESCRIPTION
+
+Creation of a record based on a record definition.
+
+=head2 Accessors
+
+=over 4
+
+=item C<record>
+
+The name of the record definition being used.
+
+=item C<exprs>
+
+A list of L<Erlang::Parser::Node>s which instantiate fields in the record.
+
+=back
+
+=head2 Methods
+
+=over 4
+
+=item C<print>
+
+Pretty-prints the node to its filehandle argument.
+
+=back
+
+=head1 EXAMPLE
+
+    #state{S=4}
+
+=cut
+
 1;
 
 # vim: set sw=4:

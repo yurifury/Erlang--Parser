@@ -20,6 +20,44 @@ sub print {
 
 __PACKAGE__->meta->make_immutable;
 
+=head1 NAME
+
+Erlang::Parser::Node::VariableRecordUpdate - variable record update
+
+=head1 DESCRIPTION
+
+An update of a variable record's component.
+
+=head2 Accessors
+
+=over 4
+
+=item C<variable>
+
+The L<Erlang::Parser::Node::Variable> which is being updated.
+
+=item C<record>
+
+An L<Erlang::Parser::Node::RecordNew> which updates parts of the record.
+
+=back
+
+=head2 Methods
+
+=over 4
+
+=item C<print>
+
+Pretty-prints the node to its filehandle argument.
+
+=back
+
+=head1 EXAMPLE
+
+    MyVar#state{part=42}
+
+=cut
+
 1;
 
 # vim: set sw=4:

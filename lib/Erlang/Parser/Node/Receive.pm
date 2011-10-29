@@ -36,6 +36,56 @@ sub print {
 
 __PACKAGE__->meta->make_immutable;
 
+=head1 NAME
+
+Erlang::Parser::Node::Receive - a receive statement
+
+=head1 DESCRIPTION
+
+Receives a message from the mailbox which matches any pattern (and guard);
+optionally with a timeout.
+
+=head2 Accessors
+
+=over 4
+
+=item C<alts>
+
+A list of L<Erlang::Parser::Node::Alt>s which are matched against the process
+mailbox.
+
+=item C<aft>
+
+An optional L<Erlang::Parser::Node::ReceiveAfter>.
+
+=back
+
+=head2 Methods
+
+=over 4
+
+=item C<print>
+
+Pretty-prints the node to its filehandle argument.
+
+=back
+
+=head1 EXAMPLE
+
+    receive
+	{X, Y} when is_bool(X) ->
+	    X;
+	{X, Y, Z} ->
+	    Y + Z;
+	_ ->
+	    io:format("wth~n", [])
+    after
+	10000 ->
+	    {error, timeout}
+    end
+
+=cut
+
 1;
 
 # vim: set sw=4:

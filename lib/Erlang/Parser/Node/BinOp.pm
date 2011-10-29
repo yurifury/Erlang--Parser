@@ -30,7 +30,7 @@ __PACKAGE__->meta->make_immutable;
 
 =head1 NAME
 
-Erlang::Parser::Node::BinOp - a block of statements
+Erlang::Parser::Node::BinOp - a binary operation
 
 =head1 DESCRIPTION
 

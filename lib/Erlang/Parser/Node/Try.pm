@@ -83,6 +83,66 @@ sub print {
 
 __PACKAGE__->meta->make_immutable;
 
+=head1 NAME
+
+Erlang::Parser::Node::Try - a try/catch clause
+
+=head1 DESCRIPTION
+
+A clause to catch exceptions. A block of expressions is evaluated; the last
+expression's value is optionally then matched against patterns and guards, and
+then a further block of statements executed. Exceptions raised therein can be
+caught in the catch clause. Finally, cleanup statements can be invoked.
+
+=head2 Accessors
+
+=over 4
+
+=item C<exprs>
+
+A list of L<Erlang::Parser::Node>s; the last expression's value is that used in
+the of clause.
+
+=item C<of>
+
+An optional list of L<Erlang::Parser::Node::Alt>s against which the last
+expression in C<exprs> is matched.
+
+=item C<catch>
+
+An optional list of L<Erlang::Parser::Node::Alt>s for exceptions raised during
+evaluation in C<exprs> and C<of>.
+
+=item C<aft>
+
+An optional list of L<Erlang::Parser::Node>s, executed after all previous
+statements.
+
+=back
+
+=head2 Methods
+
+=over 4
+
+=item C<print>
+
+Pretty-prints the node to its filehandle argument.
+
+=back
+
+=head1 EXAMPLE
+
+    try
+	{ok, X} = my_fun(),
+	binary_to_term(X)
+    catch
+	throw:Term -> Term
+    after
+	file:close(F)
+    end
+
+=cut
+
 1;
 
 # vim: set sw=4:

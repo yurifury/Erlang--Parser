@@ -23,6 +23,44 @@ sub print {
 
 __PACKAGE__->meta->make_immutable;
 
+=head1 NAME
+
+Erlang::Parser::Node::UnOp - a unary operation
+
+=head1 DESCRIPTION
+
+An prefix unary operation.
+
+=head2 Accessors
+
+=over 4
+
+=item C<op>
+
+The operation as a string (i.e. '!', 'not').
+
+=item C<a>
+
+The L<Erlang::Parser::Node> argument to the operation.
+
+=back
+
+=head2 Methods
+
+=over 4
+
+=item C<print>
+
+Pretty-prints the node to its filehandle argument.
+
+=back
+
+=head1 EXAMPLE
+
+    !true
+
+=cut
+
 1;
 
 # vim: set sw=4:
