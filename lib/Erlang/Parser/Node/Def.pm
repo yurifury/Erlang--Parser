@@ -42,6 +42,56 @@ sub print {
 
 __PACKAGE__->meta->make_immutable;
 
+=head1 NAME
+
+Erlang::Parser::Node::Def - a match in a function definition
+
+=head1 DESCRIPTION
+
+Contains a single pattern match and guard expr/seq list, with the body of the
+function.
+
+=head2 Accessors
+
+=over 4
+
+=item C<def>
+
+The name of the function.
+
+=item C<args>
+
+A list of L<Erlang::Parser::Node>s which constitute the argument patterns to be
+matched.
+
+=item C<whens>
+
+The L<Erlang::Parser::Node::WhenList> containing guard expressions/sequences.
+
+=item C<stmts>
+
+A list of L<Erlang::Parser::Node>s; the body for the function.
+
+=back
+
+=head2 Methods
+
+=over 4
+
+=item C<print>
+
+Pretty-prints the node to its filehandle argument.
+
+=back
+
+=head1 EXAMPLE
+
+    x(Y) ->
+	Z = Y + Y,
+	Z * 2
+
+=cut
+
 1;
 
 # vim: set sw=4:

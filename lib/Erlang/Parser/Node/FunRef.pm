@@ -27,6 +27,50 @@ sub print {
 
 __PACKAGE__->meta->make_immutable;
 
+=head1 NAME
+
+Erlang::Parser::Node::FunRef - a reference to a function
+
+=head1 DESCRIPTION
+
+A reference to a function (as a first-class value), either local to this
+module, or external.
+
+=head2 Accessors
+
+=over 4
+
+=item C<module>
+
+An optional L<Erlang::Parser::Node> which returns as an atom the name of the
+module to find the function in.
+
+=item C<function>
+
+The name of the function (a plain string).
+
+=item C<arity>
+
+The arity of the function (a number).
+
+=back
+
+=head2 Methods
+
+=over 4
+
+=item C<print>
+
+Pretty-prints the node to its filehandle argument.
+
+=back
+
+=head1 EXAMPLE
+
+    fun ?MODULE:code_change/0
+
+=cut
+
 1;
 
 # vim: set sw=4:

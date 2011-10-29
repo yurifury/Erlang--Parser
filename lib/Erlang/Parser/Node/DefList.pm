@@ -7,7 +7,7 @@ package Erlang::Parser::Node::DefList;
 use Moose;
 with 'Erlang::Parser::Node';
 
-has 'defs' => (is => 'rw', default => sub {[]}, isa => 'ArrayRef[Erlang::Parser::Node]');
+has 'defs' => (is => 'rw', default => sub {[]}, isa => 'ArrayRef[Erlang::Parser::Node::Def]');
 
 sub _append {
     my ($self, $expr) = @_;
@@ -28,6 +28,43 @@ sub print {
 }
 
 __PACKAGE__->meta->make_immutable;
+
+=head1 NAME
+
+Erlang::Parser::Node::DefList - a list of definitions for one function
+
+=head1 DESCRIPTION
+
+A set of definitions (alternative matches) for one function.
+
+=head2 Accessors
+
+=over 4
+
+=item C<defs>
+
+A list of L<Erlang::Parser::Node::Def>s.
+
+=back
+
+=head2 Methods
+
+=over 4
+
+=item C<print>
+
+Pretty-prints the node to its filehandle argument.
+
+=back
+
+=head1 EXAMPLE
+
+    fac(0) ->
+	1;
+    fac(N) ->
+	N * fac(N - 1)
+
+=cut
 
 1;
 

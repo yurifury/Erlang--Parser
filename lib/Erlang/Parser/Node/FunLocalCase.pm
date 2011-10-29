@@ -36,6 +36,50 @@ sub print {
 
 __PACKAGE__->meta->make_immutable;
 
+=head1 NAME
+
+Erlang::Parser::Node::FunLocalCase - one case in a local fun
+
+=head1 DESCRIPTION
+
+To L<Erlang::Parser::Node::FunLocal> as L<Erlang::Parser::Node::Def> is to
+L<Erlang::Parser::Node::DefList>.
+
+=head2 Accessors
+
+=over 4
+
+=item C<args>
+
+A list of L<Erlang::Parser::Node>s which constitute the argument patterns to be
+matched.
+
+=item C<whens>
+
+The L<Erlang::Parser::Node::WhenList> containing guard expressions/sequences.
+
+=item C<stmts>
+
+A list of L<Erlang::Parser::Node>s; the body for the function.
+
+=back
+
+=head2 Methods
+
+=over 4
+
+=item C<print>
+
+Pretty-prints the node to its filehandle argument.
+
+=back
+
+=head1 EXAMPLE
+
+    (X) when is_bool(X) -> 4
+
+=cut
+
 1;
 
 # vim: set sw=4:

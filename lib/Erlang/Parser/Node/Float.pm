@@ -17,6 +17,40 @@ sub print {
 
 __PACKAGE__->meta->make_immutable;
 
+=head1 NAME
+
+Erlang::Parser::Node::Float - a floating point integer
+
+=head1 DESCRIPTION
+
+A number with decimal places.
+
+=head2 Accessors
+
+=over 4
+
+=item C<float>
+
+The value.
+
+=back
+
+=head2 Methods
+
+=over 4
+
+=item C<print>
+
+Pretty-prints the node to its filehandle argument.
+
+=back
+
+=head1 EXAMPLE
+
+    4.1
+
+=cut
+
 1;
 
 # vim: set sw=4:
