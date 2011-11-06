@@ -32,7 +32,7 @@ Erlang::Parser - Erlang source code parser
 
 =head1 VERSION
 
-This document describes version 0.3 of Erlang::Parser released TODO.
+This document describes version 0.3 of Erlang::Parser released 2011-11-06.
 
 =cut
 

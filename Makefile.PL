@@ -20,6 +20,7 @@ WriteMakefile(
     PREREQ_PM 		=> {qw(
 	Parse::Lex	2.20
 	Parse::Yapp	0
+	Test::Simple	0
 	Test::More	0
 	Moose		0
     )},
