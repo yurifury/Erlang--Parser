@@ -19,11 +19,17 @@ sub parse {
 }
 
 sub error {
-    say STDERR "Parse error!";
-    print STDERR "Failed token was ", $_[0]->YYCurtok;
-    print STDERR ", value ", $_[0]->YYCurval;
-    print STDERR ", expected ", join(',', $_[0]->YYExpect);
-    print STDERR ".\n";
+    print STDERR "Parse error!\n";
+
+    if ($_ && $_[0] && ref($_[0]) eq 'ARRAY') {
+    	print STDERR "Failed token was ", $_[0]->YYCurtok;
+    	print STDERR ", value ", $_[0]->YYCurval;
+    	print STDERR ", expected ", join(',', $_[0]->YYExpect);
+    	print STDERR ".\n";
+    } else {
+        print STDERR "Empty object tree!\n";
+	die("Can not continue w/o object tree!\n");
+    }
 }
 
 =head1 NAME
