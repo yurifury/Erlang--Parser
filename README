@@ -2,8 +2,8 @@ NAME
     Erlang::Parser - Erlang source code parser
 
 VERSION
-    This document describes version 0.4 of Erlang::Parser released
-    2011-11-07.
+    This document describes version 0.5 of Erlang::Parser released
+    2012-02-27.
 
 SYNOPSIS
         use Erlang::Parser;

@@ -38,11 +38,11 @@ Erlang::Parser - Erlang source code parser
 
 =head1 VERSION
 
-This document describes version 0.4 of Erlang::Parser released 2011-11-07.
+This document describes version 0.5 of Erlang::Parser released 2012-02-27.
 
 =cut
 
-our $VERSION = '0.4';
+our $VERSION = '0.5';
 
 =head1 SYNOPSIS
 
