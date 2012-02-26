@@ -44,7 +44,7 @@ DESCRIPTION
         the first argument.
 
 AUTHOR
-    Anneli Cuss (anneli@cpan.org)
+    Arlen Cuss (anneli@cpan.org)
 
 SUPPORT
     You can find documentation for Erlang::Parser with the perldoc command.
@@ -71,7 +71,7 @@ SUPPORT
         <http://twitter.com/unnali>
 
 LICENSE AND COPYRIGHT
-    Copyright (c) 2011, Anneli Cuss "<ANNELI@CPAN.org>". All rights
+    Copyright (c) 2011-2012, Arlen Cuss "<ANNELI@CPAN.org>". All rights
     reserved.
 
     This module is free software; you can redistribute it and/or modify it

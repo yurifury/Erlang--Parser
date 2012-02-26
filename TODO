@@ -1,4 +1,3 @@
 See all HACK/TODOs in Parser.yp.
-Make the precedences mimic that in 7.25 of the Erlang manual.
 R/R in binary.
 S/R with 'catch' inside a try (is it the catch of 'try' or catch-expr?).
