@@ -107,11 +107,11 @@ Other places of interest:
 
 =item * GitHub: source code repository
 
-L<http://github.com/anneli/Erlang--Parser>
+L<http://github.com/unnali/Erlang--Parser>
 
 =item * GitHub: open an issue
 
-L<http://github.com/anneli/Erlang--Parser/issues>
+L<http://github.com/unnali/Erlang--Parser/issues>
 
 =item * Mailing list
 
